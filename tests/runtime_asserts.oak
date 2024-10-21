@@ -1,0 +1,10 @@
+##
+stderr: 48
+tests/runtime_asserts.oak:9:4: assertion failed
+
+exit: 1
+##
+
+fn main() {
+   assert false
+}

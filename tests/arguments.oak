@@ -1,0 +1,22 @@
+##
+argc: 3
+arg: 3
+foo
+arg: 3
+bar
+arg: 3
+baz
+
+stdout: 12
+foo
+bar
+baz
+##
+
+use std.io
+
+fn main() {
+   for let i = 0, i < argc, i += 1 {
+      &stdout << str_from_cstr(argv[i]) << '\n'
+   }
+}

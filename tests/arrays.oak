@@ -1,0 +1,29 @@
+##
+stdout: 18
+1
+2
+3
+2
+4
+6
+3
+6
+9
+##
+
+fn main() {
+   const N = 3
+   let xs [N][N]int
+
+   for let i = 0, i < N, i += 1 {
+      for let j = 0, j < N, j += 1 {
+         xs[i][j] = (i + 1) * (j + 1)
+      }
+   }
+
+   for let i = 0, i < N, i += 1 {
+      for let j = 0, j < N, j += 1 {
+         print xs[i][j]
+      }
+   }
+}

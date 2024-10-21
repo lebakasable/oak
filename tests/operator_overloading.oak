@@ -1,0 +1,10 @@
+##
+stdout: 10
+Hello, 69
+##
+
+use std.io
+
+fn main() {
+   &stdout << "Hello, " << 69 << '\n'
+}

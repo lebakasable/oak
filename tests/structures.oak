@@ -1,0 +1,19 @@
+##
+stdout: 3
+69
+##
+
+struct Vec {
+   x int
+   y int
+}
+
+fn main() {
+   let vec Vec
+   let ptr = &vec
+
+   vec.x = 34
+   ptr.y = 35
+
+   print vec.x + vec.y
+}

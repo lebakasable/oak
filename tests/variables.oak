@@ -1,0 +1,13 @@
+##
+stdout: 5
+69
+0
+##
+
+fn main() {
+   let x = 69
+   print x
+
+   let y *int
+   print y
+}

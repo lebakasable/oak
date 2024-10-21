@@ -1,0 +1,8 @@
+##
+stderr: 40
+tests/asserts.oak:8:1: assertion failed
+
+exit: 1
+##
+
+assert 69 == 420

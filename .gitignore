@@ -1,3 +1,5 @@
 /oak
 /tests/*
-/!tests/*.oak
+!/tests/*.oak
+/examples/*
+!/examples/*.oak
