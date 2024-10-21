@@ -19,7 +19,7 @@ syntax match Number "\<[0-9][0-9_]*\>"
 syntax match Comment "#.*" contains=Todo
 syntax match Character "'\(\\[nrt0'"\\]\|[^'\\]\)'" contains=SpecialChar
 syntax region String start='"' skip='\\\\\|\\"' end='"' contains=SpecialChar
-syntax match SpecialChar display contained "\\[nt0\"']"
+syntax match SpecialChar display contained "\\[nte0\"']"
 syntax keyword Todo TODO XXX FIXME NOTE
 syntax keyword Keyword if else for match break return sizeof assert as use fn let const struct
 syntax keyword Special argc argv

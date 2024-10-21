@@ -257,6 +257,7 @@ fn lexer_char(name Str) char {
          '"' => ch = '"'
          '\'' => ch = '\''
          '\\' => ch = '\\'
+         'e' => ch = '\e'
          else => {
             lexer.pos = pos
             error_invalid("escape character")
