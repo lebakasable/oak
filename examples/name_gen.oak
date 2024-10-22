@@ -1,0 +1,29 @@
+use std.io
+use std.libc
+
+const SYL = 5
+const WORDS = 10
+
+let vow = "aeiou"
+let con = "bcdfghjklmnpqrstvwxyz"
+
+fn rand_vow() char { return vow.data[rand()%vow.size] }
+fn rand_con() char { return con.data[rand()%con.size] }
+
+fn print_rand_syl() {
+   match rand()%3 {
+      0 => &stdout << rand_con() << rand_vow()
+      1 => &stdout << rand_con() << rand_vow() << rand_con()
+      2 => &stdout << rand_vow() << rand_con()
+   }
+}
+
+fn main() {
+   srand(time(0 as *int))
+   for let i = 0, i < WORDS, i += 1 {
+      for let j = 0, j < 1 + rand()%(SYL - 1), j += 1 {
+         print_rand_syl()
+      }
+      &stdout << "\n"
+   }
+}
