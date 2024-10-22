@@ -16,19 +16,16 @@ fn row_new() Row {
    return row
 }
 
-fn sum_bytes(n int) int {
-   let result = 0
-   for let i = 0, i < 8, i += 1 {
-      result += n&255
-      n = n >> 8
-   }
-   return result
-}
-
 fn row_random() Row {
    let row Row
    for let i = 0, i < ROW_SIZE, i += 1 {
-      row.cells[i] = (sum_bytes(rand())&255)%2
+      let almost_random = rand()
+      let random = 0
+      for let i = 0, i < 8, i += 1 {
+         random += almost_random&255
+         almost_random = almost_random >> 8
+      }
+      row.cells[i] = (random&255)%2
    }
    return row
 }
