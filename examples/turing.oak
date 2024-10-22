@@ -1,20 +1,6 @@
 use std.io
 use std.array
 
-struct Machine {
-   data *bool
-   size int
-   head int
-}
-
-fn machine_new(size int) Machine {
-   let machine Machine
-   machine.data = malloc(size) as *bool
-   machine.size = size
-   machine.head = 0
-   return machine
-}
-
 const LEFT = -1
 const STAY = 0
 const RIGHT = 1
@@ -31,14 +17,6 @@ struct Inst {
    no State
 }
 
-struct Program {
-   machine *Machine
-   insts *Inst
-   insts_count int
-   insts_capacity int
-   cur int
-}
-
 fn inst_new(expected bool, yes_write bool, yes_dir int, yes_next int, no_write bool, no_dir int, no_next int) Inst {
    let inst Inst
    inst.expected = expected
@@ -49,6 +27,20 @@ fn inst_new(expected bool, yes_write bool, yes_dir int, yes_next int, no_write b
    inst.no.dir = no_dir
    inst.no.next = no_next
    return inst
+}
+
+struct Machine {
+   data *bool
+   size int
+   head int
+}
+
+fn machine_new(size int) Machine {
+   let machine Machine
+   machine.data = malloc(size) as *bool
+   machine.size = size
+   machine.head = 0
+   return machine
 }
 
 fn machine_randomize(machine *Machine) {
@@ -81,8 +73,27 @@ fn machine_print(machine *Machine) {
    &stdout << "\n"
 }
 
-fn [<<](program *Program, inst Inst) {
+struct Program {
+   machine *Machine
+   insts *Inst
+   insts_count int
+   insts_capacity int
+   cur int
+}
+
+fn program_new(machine *Machine) Program {
+   let program Program
+   program.machine = machine
+   program.insts = 0 as *Inst
+   program.insts_count = 0
+   program.insts_capacity = 0
+   program.cur = 0
+   return program
+}
+
+fn [<<](program *Program, inst Inst) *Program {
    *(array_push(&program.insts as **char, &program.insts_count, &program.insts_capacity, sizeof(Inst)) as *Inst) = inst
+   return program
 }
 
 fn main() {
@@ -97,16 +108,8 @@ fn main() {
       }
    }
 
-   let program Program
-   program.machine = &machine
-
-   const INSTS_CAP = 1
-   let insts [INSTS_CAP]Inst
-   insts[0] = inst_new(false, true, RIGHT, 2, false, RIGHT, 0)
-
-   program.cur = 0
-   program.insts = &insts
-   program.insts_count = INSTS_CAP
+   let program = program_new(&machine)
+   &program << inst_new(false, true, RIGHT, 2, false, RIGHT, 0)
 
    machine_print(program.machine)
    for program.cur < program.insts_count {
