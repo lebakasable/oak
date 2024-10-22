@@ -1,0 +1,73 @@
+use std.io
+
+const TIMEZONE = 2
+const FONT_CAP = 11
+const FONT_ROWS = 5
+const FONT_COLS = 3
+const DIGITS_COUNT = 8
+const DIGITS_PAD = 2
+
+fn print_font_char(ch int) {
+   for let y = 0, y < FONT_ROWS, y += 1 {
+      for let x = 0, x < FONT_COLS, x += 1 {
+         if (ch>>((FONT_ROWS - y - 1)*FONT_COLS + x))&1 == 1 {
+            &stdout << "*"
+         } else {
+            &stdout << " "
+         }
+      }
+      &stdout << "\n"
+   }
+}
+
+fn main() {
+   let font [FONT_CAP]int
+   font[0] = 31599
+   font[1] = 19812
+   font[2] = 14479
+   font[3] = 31207
+   font[4] = 23524
+   font[5] = 29411
+   font[6] = 29679
+   font[7] = 30866
+   font[8] = 31727
+   font[9] = 31719
+   font[10] = 1040
+
+   let w = (FONT_COLS + DIGITS_PAD)*DIGITS_COUNT
+   let h = FONT_ROWS
+
+   for true {
+      let seconds_since_epoch = time(0 as *int)
+      let hour = (seconds_since_epoch/3600)%24 + TIMEZONE
+      let min = (seconds_since_epoch/60)%60
+      let sec = seconds_since_epoch%60
+
+      let digits [DIGITS_COUNT]int
+      digits[0] = hour/10
+      digits[1] = hour%10
+      digits[2] = 10
+      digits[3] = min/10
+      digits[4] = min%10
+      digits[5] = 10
+      digits[6] = sec/10
+      digits[7] = sec%10
+
+      for let y = 0, y < h, y += 1 {
+         for let x = 0, x < w, x += 1 {
+            let i = x/(FONT_COLS + DIGITS_PAD)
+            let dx = x%(FONT_COLS + DIGITS_PAD)
+            if dx < FONT_COLS && (font[digits[i]]>>((FONT_ROWS - y - 1)*FONT_COLS + dx))&1 == 1 {
+               &stdout << "\e[41m \e[0m"
+            } else {
+               &stdout << " "
+            }
+         }
+         &stdout << "\n"
+      }
+
+      &stdout << "\e[" << h << "A"
+      &stdout << "\e[" << w << "D"
+      for let i = 0, i < 20000000, i += 1 {}
+   }
+}
