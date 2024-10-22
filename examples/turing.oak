@@ -29,36 +29,45 @@ fn inst_new(expected bool, yes_write bool, yes_dir int, yes_next int, no_write b
    return inst
 }
 
-struct Machine {
+struct Tape {
    data *bool
-   size int
+   count int
+   capacity int
+}
+
+fn tape_randomize(tape *Tape) {
+   srand(time(0 as *int))
+   for let i = 0, i < tape.count, i += 1 {
+      tape.data[i] = (real_rand()%2) as bool
+   }
+}
+
+struct Machine {
+   tape Tape
    head int
 }
 
 fn machine_new(size int) Machine {
    let machine Machine
-   machine.data = malloc(size) as *bool
-   machine.size = size
+   machine.tape.data = malloc(size) as *bool
+   machine.tape.count = size
+   machine.tape.capacity = size
    machine.head = 0
    return machine
 }
 
-fn machine_randomize(machine *Machine) {
-   srand(time(0 as *int))
-   for let i = 0, i < machine.size, i += 1 {
-      machine.data[i] = (real_rand()%2) as bool
-   }
-}
-
 fn machine_execute(machine *Machine, inst Inst, insts_count int) int {
-   if machine.head >= machine.size { return insts_count }
-   if machine.data[machine.head] == inst.expected {
-      machine.data[machine.head] = inst.yes.write
+   if machine.head >= machine.tape.count {
+      *(array_push(&machine.tape.data as **char, &machine.tape.count, &machine.tape.capacity, sizeof(bool)) as *bool) = false
+   }
+
+   if machine.tape.data[machine.head] == inst.expected {
+      machine.tape.data[machine.head] = inst.yes.write
       if machine.head == 0 && inst.yes.dir < 0 { return insts_count }
       machine.head += inst.yes.dir
       return inst.yes.next
    }
-   machine.data[machine.head] = inst.no.write
+   machine.tape.data[machine.head] = inst.no.write
    if machine.head == 0 && inst.no.dir < 0 { return insts_count }
    machine.head += inst.no.dir
    return inst.no.next
@@ -66,9 +75,9 @@ fn machine_execute(machine *Machine, inst Inst, insts_count int) int {
 
 fn machine_print(machine *Machine) {
    &stdout << "head: " << machine.head << ", "
-   for let i = 0, i < machine.size, i += 1 {
+   for let i = 0, i < machine.tape.count, i += 1 {
       if i > 0 { &stdout << " -> " }
-      &stdout << machine.data[i] as int
+      &stdout << machine.tape.data[i] as int
    }
    &stdout << "\n"
 }
@@ -100,11 +109,11 @@ fn main() {
    let machine Machine
    if argc == 0 {
       machine = machine_new(8)
-      machine_randomize(&machine)
+      tape_randomize(&machine.tape)
    } else {
       machine = machine_new(strlen(argv[0]))
-      for let i = 0, i < machine.size, i += 1 {
-         machine.data[i] = argv[0][i] != '0'
+      for let i = 0, i < machine.tape.count, i += 1 {
+         machine.tape.data[i] = argv[0][i] != '0'
       }
    }
 
