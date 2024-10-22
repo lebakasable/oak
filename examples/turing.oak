@@ -1,0 +1,80 @@
+use std.io
+
+struct Machine {
+   data *bool
+   size int
+
+   head int
+}
+
+const LEFT = -1
+const STAY = 0
+const RIGHT = 1
+
+struct Inst {
+   expected bool
+
+   write_yes bool
+   dir_yes int
+   next_yes int
+
+   write_no bool
+   dir_no int
+   next_no int
+}
+
+fn inst_new(expected bool, write_yes bool, dir_yes int, next_yes int, write_no bool, dir_no int, next_no int) Inst {
+   let inst Inst
+   inst.expected = expected
+   inst.write_yes = write_yes
+   inst.dir_yes = dir_yes
+   inst.next_yes = next_yes
+   inst.write_no = write_no
+   inst.dir_no = dir_no
+   inst.next_no = next_no
+   return inst
+}
+
+fn machine_randomize(machine *Machine) {
+   srand(time(0 as *int))
+   for let i = 0, i < machine.size, i += 1 {
+      machine.data[i] = (real_rand()%2) as bool
+   }
+}
+
+fn machine_execute(machine *Machine, inst Inst) int {
+   if machine.data[machine.head] == inst.expected {
+      machine.data[machine.head] = inst.write_yes
+      machine.head += inst.dir_yes
+      return inst.next_yes
+   }
+   machine.data[machine.head] = inst.write_no
+   machine.head += inst.dir_no
+   return inst.next_no
+}
+
+fn machine_print(machine *Machine) {
+   &stdout << "head: " << machine.head << ", "
+   for let i = 0, i < machine.size, i += 1 {
+      &stdout << machine.data[i] as int << " -> "
+   }
+   &stdout << "\n"
+}
+
+fn main() {
+   let machine Machine
+   machine.size = 8
+   machine.head = 0
+   machine.data = malloc(machine.size*sizeof(bool)) as *bool
+   machine_randomize(&machine)
+
+   const INSTS_CAP = 1
+   let insts [INSTS_CAP]Inst
+   insts[0] = inst_new(false, true, RIGHT, 2, false, RIGHT, 0)
+
+   machine_print(&machine)
+   for let cur = 0, cur < INSTS_CAP {
+      cur = machine_execute(&machine, insts[cur])
+      machine_print(&machine)
+   }
+}
