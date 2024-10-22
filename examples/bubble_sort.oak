@@ -1,0 +1,39 @@
+use std.io
+use std.libc
+
+const XS_CAP = 20
+let xs [XS_CAP]int
+
+fn bubble_sort(array **int, count int) {
+   for let i = 0, i < count, i += 1 {
+      let swapped = false
+      for let j = 0, j < count - i - 1, j += 1 {
+         if array[j] > array[j + 1] {
+            let tmp = array[j]
+            array[j] = array[j + 1]
+            array[j + 1] = tmp
+            swapped = true
+         }
+      }
+
+      if !swapped { break }
+   }
+}
+
+fn print_xs() {
+   for let i = 0, i < XS_CAP, i += 1 {
+      &stdout << " " << xs[i]
+   }
+   &stdout << "\n"
+}
+
+fn main() {
+   srand(time(0 as *int))
+   for let i = 0, i < XS_CAP, i += 1 {
+      xs[i] = rand()%100
+   }
+
+   &stdout << "Unsorted:\n" print_xs()
+   bubble_sort(&xs as **int, XS_CAP)
+   &stdout << "Sorted:\n" print_xs()
+}
