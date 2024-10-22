@@ -1,0 +1,37 @@
+use std.io
+
+const WIDTH = 512
+const HEIGHT = 512
+const CELL_WIDTH = 64
+const CELL_HEIGHT = 64
+
+let canvas [WIDTH*HEIGHT*3]char
+
+fn main() {
+   if argc == 0 {
+      &stderr << "Usage: checker.oak OUTPUT\n"
+      &stderr << "error: output path not provided\n"
+      exit(1)
+   }
+   let output_path = argv[0]
+
+   for let y = 0, y < HEIGHT, y += 1 {
+      for let x = 0, x < WIDTH, x += 1 {
+         if (y/CELL_HEIGHT + x/CELL_WIDTH)%2 == 0 {
+            canvas[(y*WIDTH + x)*3 + 0] = 255 as char
+            canvas[(y*WIDTH + x)*3 + 1] = 255 as char
+            canvas[(y*WIDTH + x)*3 + 2] = 255 as char
+         } else {
+            canvas[(y*WIDTH + x)*3 + 0] = 0 as char
+            canvas[(y*WIDTH + x)*3 + 1] = 0 as char
+            canvas[(y*WIDTH + x)*3 + 2] = 0 as char
+         }
+      }
+   }
+
+   let file File
+   assert file_create(&file, output_path)
+
+   &file << "P6\n" << WIDTH << " " << HEIGHT << " 255\n"
+   file_write(&file, &canvas, WIDTH*HEIGHT*3)
+}
