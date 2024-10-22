@@ -1,0 +1,71 @@
+use std.io
+use std.libc
+
+const ROW_SIZE = 50
+const ITERATIONS = 100
+
+struct Row {
+   cells [ROW_SIZE]int
+}
+
+fn row_new() Row {
+   let row Row
+   for let i = 0, i < ROW_SIZE, i += 1 {
+      row.cells[i] = 0
+   }
+   return row
+}
+
+fn sum_bytes(n int) int {
+   let result = 0
+   for let i = 0, i < 8, i += 1 {
+      result += n&255
+      n = n >> 8
+   }
+   return result
+}
+
+fn row_random() Row {
+   let row Row
+   for let i = 0, i < ROW_SIZE, i += 1 {
+      row.cells[i] = (sum_bytes(rand())&255)%2
+   }
+   return row
+}
+
+fn row_next(prev Row) Row {
+   let patterns [8]int
+   patterns[0] = 0
+   patterns[1] = 1
+   patterns[2] = 1
+   patterns[3] = 1
+   patterns[4] = 0
+   patterns[5] = 1
+   patterns[6] = 1
+   patterns[7] = 0
+
+   let next = row_new()
+   for let i = 1, i < ROW_SIZE - 1, i += 1 {
+      let index = (prev.cells[i - 1] << 2) | (prev.cells[i] << 1) | prev.cells[i + 1]
+      next.cells[i] = patterns[index]
+   }
+   return next
+}
+
+fn row_print(row Row) {
+   &stdout << '|'
+   for let i = 0, i < ROW_SIZE, i += 1 {
+      &stdout << " *"c[row.cells[i]]
+   }
+   &stdout << "|\n"
+}
+
+fn main() {
+   srand(time(0 as *int))
+
+   let row = row_random()
+   for let i = 0, i < ITERATIONS, i += 1 {
+      row_print(row)
+      row = row_next(row)
+   }
+}
