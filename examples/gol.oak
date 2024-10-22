@@ -1,0 +1,73 @@
+use std.io
+use std.libc
+
+const ROWS = 8
+const COLS = 16
+
+let front [ROWS][COLS]bool
+let back [ROWS][COLS]bool
+
+fn display() {
+   for let y = 0, y < ROWS, y += 1 {
+      for let x = 0, x < COLS, x += 1 {
+         &stdout << ".#"c[front[y][x] as int]
+      }
+      &stdout << '\n'
+   }
+}
+
+fn count_nbors(cx int, cy int) int {
+   let nbors = 0
+   for let dy = -1, dy <= 1, dy += 1 {
+      for let dx = -1, dx <= 1, dx += 1 {
+         if dx != 0 || dy != 0 {
+            let x = emod(cx + dx, COLS)
+            let y = emod(cy + dy, ROWS)
+            nbors += front[y][x] as int
+         }
+      }
+   }
+   return nbors
+}
+
+fn next() {
+   for let y = 0, y < ROWS, y += 1 {
+      for let x = 0, x < COLS, x += 1 {
+         let nbors = count_nbors(x, y)
+         if front[y][x] {
+            back[y][x] = nbors == 2 || nbors == 3
+         } else {
+            back[y][x] = nbors == 3
+         }
+      }
+   }
+}
+
+fn swap() {
+   for let y = 0, y < ROWS, y += 1 {
+      for let x = 0, x < COLS, x += 1 {
+         front[y][x] = back[y][x]
+      }
+   }
+}
+
+fn main() {
+   front[0][1] = true
+   front[1][2] = true
+   front[2][0] = true
+   front[2][1] = true
+   front[2][2] = true
+
+   display()
+   for true {
+      &stdout << "\e[" << ROWS << "A"
+      &stdout << "\e[" << COLS << "D"
+      display()
+
+      next()
+
+      swap()
+
+      for let i = 0, i < 20000000, i += 1 {}
+   }
+}
