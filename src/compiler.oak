@@ -167,6 +167,7 @@ fn str_encode(str Str, cstr bool) Str {
             '"' => ch = '"'
             '\'' => ch = '\''
             '\\' => ch = '\\'
+            'e' => ch = '\e'
             else => assert false
          }
       }

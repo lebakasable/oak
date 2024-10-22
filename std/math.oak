@@ -11,3 +11,7 @@ fn max(a int, b int) int {
    }
    return b
 }
+
+fn emod(a int, b int) int {
+   return (a%b + b)%b
+}

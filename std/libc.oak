@@ -1,3 +1,6 @@
+const EAGAIN = -11
+
+const STDIN = 0
 const STDOUT = 1
 const STDERR = 2
 
@@ -11,6 +14,7 @@ fn write(fd int, data *char, count int) int {
 
 const O_RDONLY = 0
 const O_WRONLY = 1
+const O_NONBLOCK = 2048
 
 fn open(path *char, flags int, mode int) int {
    return syscall(2, path, flags, mode)
@@ -93,6 +97,17 @@ fn creat(path *char, mode int) int {
 
 fn unlink(path *char) int {
    return syscall(87, path)
+}
+
+const F_GETFL = 3
+const F_SETFL = 4
+
+fn fcntl(fd int, cmd int, arg int) int {
+   return syscall(72, fd, cmd, arg)
+}
+
+fn time(tloc *int) int {
+   return syscall(201, tloc)
 }
 
 fn isspace(ch char) bool {
@@ -225,4 +240,15 @@ fn realloc(block *char, size int) *char {
 
 fn zalloc(size int) *char {
    return memset(malloc(size), '\0', size)
+}
+
+let _rand_state int
+
+fn srand(seed int) {
+   _rand_state = seed
+}
+
+fn rand() int {
+   _rand_state = (1664525*_rand_state + 1013904223)%4294967296
+   return _rand_state
 }
