@@ -1,0 +1,22 @@
+use std.io
+
+fn main() {
+   let src = "use std.io\n\nfn main() {\n   let src = \"?\"\n   for let i = 0, i < src.size, i += 1 {\n      if src.data[i] == 63 as char {\n         for let j = 0, j < src.size, j += 1 {\n            if src.data[j] == '\\n' {\n               &stdout << \"\\\\n\"\n            } else if src.data[j] == '\"' {\n               &stdout << \"\\\\\\\"\"\n            } else if src.data[j] == '\\\\' {\n               &stdout << '\\\\' << '\\\\'\n            } else {\n               &stdout << src.data[j]\n            }\n         }\n      } else {\n         &stdout << src.data[i]\n      }\n   }\n}\n"
+   for let i = 0, i < src.size, i += 1 {
+      if src.data[i] == 63 as char {
+         for let j = 0, j < src.size, j += 1 {
+            if src.data[j] == '\n' {
+               &stdout << "\\n"
+            } else if src.data[j] == '"' {
+               &stdout << "\\\""
+            } else if src.data[j] == '\\' {
+               &stdout << '\\' << '\\'
+            } else {
+               &stdout << src.data[j]
+            }
+         }
+      } else {
+         &stdout << src.data[i]
+      }
+   }
+}
