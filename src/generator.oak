@@ -332,10 +332,12 @@ fn generate(path *char) {
 
    file_close(&file)
 
-   let args [3]*char
+   let args [5]*char
    args[0] = "/bin/fasm"c
-   args[1] = path
-   args[2] = 0 as *char
+   args[1] = "-m"c
+   args[2] = "524288"c 
+   args[3] = path
+   args[4] = 0 as *char
    if execute_command(&args as **char, true) == 0 {
       unlink(path)
    } else {
