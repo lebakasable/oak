@@ -409,6 +409,7 @@ fn check_type(node int) {
             nodes[node].type = type_new(TYPE_STRUCT, 0, nodes[node].token.data)
          } else if aliases_find(nodes[node].token.str, &nodes[node].token.data) {
             nodes[node].token.data = aliases[nodes[node].token.data]
+            # TODO: be able to alias an array type
             nodes[node].type = type_new(nodes[nodes[nodes[node].token.data].nodes[NODE_ALIAS_TYPE]].type.kind, 0, 0)
          } else {
             error_undefined(node, "type")
