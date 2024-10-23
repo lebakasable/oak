@@ -7,13 +7,14 @@ use std.math
 const ROWS = 10
 const COLS = 20
 
+alias Cell int
 const (
    CELL_EMPTY
    CELL_APPLE
    CELL_SNAKE
 )
 
-let cells [ROWS][COLS]int
+let cells [ROWS][COLS]Cell
 
 struct Point {
    x int
@@ -27,6 +28,7 @@ fn point_new(x int, y int) Point {
    return point
 }
 
+alias Dir int
 const (
    DIR_UP
    DIR_LEFT
@@ -34,7 +36,7 @@ const (
    DIR_RIGHT
 )
 
-fn point_step(point *Point, dir int) {
+fn point_step(point *Point, dir Dir) {
    match dir {
       DIR_UP => point.y -= 1
       DIR_LEFT => point.x -= 1
@@ -77,7 +79,7 @@ fn snake_del() {
 }
 
 let head_pos Point
-let head_dir int
+let head_dir Dir
 
 fn display() {
    for let y = 0, y < ROWS, y += 1 {
@@ -103,7 +105,7 @@ fn spawn_apple() {
    cells[y][x] = CELL_APPLE
 }
 
-fn spawn_snake(point Point, dir int, len int) {
+fn spawn_snake(point Point, dir Dir, len int) {
    head_pos = point
    head_dir = dir
    snake_add(point)

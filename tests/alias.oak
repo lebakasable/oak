@@ -1,0 +1,11 @@
+##
+stdout: 3
+49
+##
+alias Number int
+
+fn main() {
+   let x Number
+   x = 49
+   print x
+}

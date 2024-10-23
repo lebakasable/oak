@@ -22,7 +22,7 @@ syntax match Character "'\(\\[nrt0'"\\]\|[^'\\]\)'" contains=SpecialChar
 syntax region String start='"' skip='\\\\\|\\"' end='"' contains=SpecialChar
 syntax match SpecialChar display contained "\\[nte0\"']"
 syntax keyword Todo TODO XXX FIXME NOTE
-syntax keyword Keyword if else for match break return sizeof assert as use fn let const struct
+syntax keyword Keyword if else for match break return sizeof assert as use fn let const alias struct
 syntax keyword Special argc argv
 syntax keyword Boolean true false
 syntax keyword Type nil int bool char

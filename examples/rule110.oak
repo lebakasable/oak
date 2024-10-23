@@ -4,8 +4,10 @@ use std.libc
 const ROW_SIZE = 50
 const ITERATIONS = 100
 
+alias Cell int
+
 struct Row {
-   cells [ROW_SIZE]int
+   cells [ROW_SIZE]Cell
 }
 
 fn row_new() Row {
@@ -25,7 +27,7 @@ fn row_random() Row {
 }
 
 fn row_next(prev Row) Row {
-   let patterns [8]int
+   let patterns [8]Cell
    patterns[0] = 0
    patterns[1] = 1
    patterns[2] = 1

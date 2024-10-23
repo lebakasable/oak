@@ -10,6 +10,7 @@ fn [<<](f *File, pos Pos) *File {
    return f << pos.path << ':' << pos.row << ':' << pos.col << ": "
 }
 
+alias Token_Kind int
 const (
    TOKEN_EOF
    TOKEN_INT
@@ -87,7 +88,7 @@ const (
 )
 
 assert COUNT_TOKENS == 61
-fn str_from_token_kind(kind int) Str {
+fn str_from_token_kind(kind Token_Kind) Str {
    match kind {
       TOKEN_EOF => return "end of file"
       TOKEN_INT => return "integer"
@@ -167,7 +168,7 @@ fn str_from_token_kind(kind int) Str {
 }
 
 struct Token {
-   kind int
+   kind Token_Kind
    data int
    pos Pos
    str Str
@@ -523,13 +524,13 @@ fn lexer_peek() Token {
    return lexer.buffer
 }
 
-fn lexer_read(kind int) bool {
+fn lexer_read(kind Token_Kind) bool {
    lexer_peek()
    lexer.peeked = lexer.buffer.kind != kind
    return !lexer.peeked
 }
 
-fn lexer_expect(kind int) Token {
+fn lexer_expect(kind Token_Kind) Token {
    let token = lexer_next()
    if token.kind != kind {
       &stderr << token.pos << "error: expected " << str_from_token_kind(kind) << ", got " << str_from_token_kind(token.kind) << "\n"
@@ -538,7 +539,7 @@ fn lexer_expect(kind int) Token {
    return token
 }
 
-fn lexer_either(a int, b int) Token {
+fn lexer_either(a Token_Kind, b Token_Kind) Token {
    let token = lexer_next()
    if token.kind != a && token.kind != b {
       &stderr << token.pos << "error: expected " << str_from_token_kind(a) << " or " << str_from_token_kind(b) << ", got " << str_from_token_kind(token.kind) << "\n"

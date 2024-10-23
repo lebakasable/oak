@@ -3,6 +3,7 @@ use std.array
 
 const STATES_COUNT = 3
 
+alias Dir int
 const LEFT = -1
 const STAY = 0
 const RIGHT = 1
@@ -10,11 +11,11 @@ const RIGHT = 1
 struct State {
    expected char
    write char
-   dir int
+   dir Dir
    next int
 }
 
-fn state_new(expected char, write char, dir int, next int) State {
+fn state_new(expected char, write char, dir Dir, next int) State {
    let state State
    state.expected = expected
    state.write = write

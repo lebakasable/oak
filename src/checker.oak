@@ -82,7 +82,7 @@ fn type_isarray(type Type) bool {
    return type.kind == TYPE_ARRAY && type.ref == 0
 }
 
-fn type_new(kind int, ref int, data int) Type {
+fn type_new(kind Type_Kind, ref int, data int) Type {
    let type Type
    type.kind = kind
    type.ref = ref
@@ -194,7 +194,7 @@ fn functions_find(name Str, index *int) bool {
    return false
 }
 
-fn operator_functions_find(kind int, lhs int, rhs int, index *int) bool {
+fn operator_functions_find(kind Token_Kind, lhs int, rhs int, index *int) bool {
    for let i = 0, i < functions_count, i += 1 {
       let func = functions[i].node
       if nodes[func].token.kind == kind && nodes[nodes[func].nodes[NODE_FN_ARGS]].type == nodes[lhs].type && nodes[nodes[nodes[func].nodes[NODE_FN_ARGS]].next].type == nodes[rhs].type {

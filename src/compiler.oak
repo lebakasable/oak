@@ -1,5 +1,6 @@
 use src.checker
 
+alias Op_Kind int
 const (
    OP_PUSH
    OP_DROP
@@ -53,7 +54,7 @@ const (
 )
 
 struct Op {
-   kind int
+   kind Op_Kind
    data int
 }
 
@@ -125,7 +126,7 @@ const OPS_CAP = 32000
 let ops [OPS_CAP]Op
 let ops_count int
 
-fn ops_push(kind int, data int) {
+fn ops_push(kind Op_Kind, data int) {
    assert ops_count < OPS_CAP
    ops[ops_count].kind = kind
    ops[ops_count].data = data

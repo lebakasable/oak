@@ -4,8 +4,10 @@ use std.libc
 const ROWS = 8
 const COLS = 16
 
-let front [ROWS][COLS]bool
-let back [ROWS][COLS]bool
+alias Cell bool
+
+let front [ROWS][COLS]Cell
+let back [ROWS][COLS]Cell
 
 fn display() {
    for let y = 0, y < ROWS, y += 1 {

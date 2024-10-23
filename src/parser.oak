@@ -1,6 +1,7 @@
 use std.arena
 use src.lexer
 
+alias Type_Kind int
 const (
    TYPE_NIL
    TYPE_INT
@@ -12,11 +13,12 @@ const (
 )
 
 struct Type {
-   kind int
+   kind Type_Kind
    ref int
    data int
 }
 
+alias Node_Kind int
 const (
    NODE_ATOM
    NODE_CALL
@@ -92,19 +94,19 @@ const NODE_RETURN_EXPR = 0
 const NODE_PRINT_EXPR = 0
 
 struct Node {
-   kind int
+   kind Node_Kind
    type Type
    token Token
 
-   nodes [4]int
-   next int
+   nodes [4]Node_Kind
+   next Node_Kind
 }
 
 const NODES_CAP = 16000
 let nodes [NODES_CAP]Node
 let nodes_count int
 
-fn node_new(kind int, token Token) int {
+fn node_new(kind Node_Kind, token Token) int {
    assert nodes_count < NODES_CAP
    nodes[nodes_count].kind = kind
    nodes[nodes_count].token = token
@@ -132,6 +134,7 @@ fn node_list_find(list int, node int) bool {
    return false
 }
 
+alias Power int
 const (
    POWER_NIL
    POWER_SET
@@ -148,7 +151,7 @@ const (
 )
 
 assert COUNT_TOKENS == 61
-fn power_from_token_kind(kind int) int {
+fn power_from_token_kind(kind Token_Kind) Power {
    match kind {
       TOKEN_DOT => return POWER_DOT
       TOKEN_LBRACKET => return POWER_IDX
@@ -359,7 +362,7 @@ fn imports_find(path Str) bool {
    return false
 }
 
-fn is_operator_function_token_kind(kind int) bool {
+fn is_operator_function_token_kind(kind Token_Kind) bool {
    let power = power_from_token_kind(kind)
    return power >= POWER_CMP && power <= POWER_MUL
 }
