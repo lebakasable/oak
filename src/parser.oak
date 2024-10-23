@@ -32,6 +32,7 @@ const (
    NODE_FN
    NODE_LET
    NODE_CONST
+   NODE_ALIAS
    NODE_STRUCT
    NODE_ASSERT
 
@@ -79,6 +80,8 @@ const NODE_LET_TYPE = 1
 
 const NODE_CONST_EXPR = 0
 const NODE_CONST_LIST = 1
+
+const NODE_ALIAS_TYPE = 0
 
 const NODE_STRUCT_FIELDS = 0
 
@@ -144,7 +147,7 @@ const (
    POWER_IDX
 )
 
-assert COUNT_TOKENS == 60
+assert COUNT_TOKENS == 61
 fn power_from_token_kind(kind int) int {
    match kind {
       TOKEN_DOT => return POWER_DOT
@@ -166,7 +169,7 @@ fn error_unexpected(token Token) {
    exit(1)
 }
 
-assert COUNT_TOKENS == 60
+assert COUNT_TOKENS == 61
 fn parse_const(mbp int) int {
    let node int
    let token = lexer_next()
@@ -234,7 +237,7 @@ fn parse_type() int {
    return node
 }
 
-assert COUNT_TOKENS == 60
+assert COUNT_TOKENS == 61
 fn parse_expr(mbp int) int {
    let node int
    let token = lexer_next()
@@ -361,7 +364,7 @@ fn is_operator_function_token_kind(kind int) bool {
    return power >= POWER_CMP && power <= POWER_MUL
 }
 
-assert COUNT_TOKENS == 60
+assert COUNT_TOKENS == 61
 fn parse_stmt(loop bool) int {
    let node int
    let token = lexer_next()
@@ -510,6 +513,12 @@ fn parse_stmt(loop bool) int {
                iter = node_list_push(iter, node_new(NODE_CONST, lexer_expect(TOKEN_IDENT)))
             }
          }
+      }
+
+      TOKEN_ALIAS => {
+         local_assert(token, false)
+         node = node_new(NODE_ALIAS, lexer_expect(TOKEN_IDENT))
+         nodes[node].nodes[NODE_ALIAS_TYPE] = parse_type()
       }
 
       TOKEN_STRUCT => {

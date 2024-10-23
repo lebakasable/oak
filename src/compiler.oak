@@ -228,8 +228,8 @@ fn compile_ref(node int) {
    }
 }
 
-assert COUNT_NODES == 17
-assert COUNT_TOKENS == 60
+assert COUNT_NODES == 18
+assert COUNT_TOKENS == 61
 fn compile_expr(node int, ref bool) {
    match nodes[node].kind {
       NODE_ATOM => {
@@ -556,8 +556,8 @@ let pred_jumps Jumps
 let break_jumps Jumps
 let branch_jumps Jumps
 
-assert COUNT_NODES == 17
-assert COUNT_TOKENS == 60
+assert COUNT_NODES == 18
+assert COUNT_TOKENS == 61
 fn compile_stmt(node int) {
    match nodes[node].kind {
       NODE_BLOCK => {
@@ -729,6 +729,8 @@ fn compile_stmt(node int) {
             ops_push(OP_HALT, 1)
          }
       }
+
+      NODE_ALIAS => {}
 
       NODE_STRUCT => {
          nodes[node].token.data = 0

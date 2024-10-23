@@ -1,7 +1,7 @@
 use src.parser
 
-assert COUNT_NODES == 17
-assert COUNT_TOKENS == 60
+assert COUNT_NODES == 18
+assert COUNT_TOKENS == 61
 fn eval_const_unary(node int) {
    let expr = nodes[node].nodes[NODE_UNARY_EXPR]
 
@@ -13,8 +13,8 @@ fn eval_const_unary(node int) {
    }
 }
 
-assert COUNT_NODES == 17
-assert COUNT_TOKENS == 60
+assert COUNT_NODES == 18
+assert COUNT_TOKENS == 61
 fn eval_const_binary(node int) {
    let lhs = nodes[node].nodes[NODE_BINARY_LHS]
    let rhs = nodes[node].nodes[NODE_BINARY_RHS]
@@ -224,6 +224,25 @@ fn structures_find(name Str, index *int) bool {
    return false
 }
 
+let aliases [SCOPE_CAP]int
+let aliases_count int
+
+fn aliases_push(node int) {
+   assert aliases_count < SCOPE_CAP
+   aliases[aliases_count] = node
+   aliases_count += 1
+}
+
+fn aliases_find(name Str, index *int) bool {
+   for let i = aliases_count, i > 0, i -= 1 {
+      if nodes[aliases[i - 1]].token.str == name {
+         *index = i - 1
+         return true
+      }
+   }
+   return false
+}
+
 fn error_undefined(node int, name Str) {
    &stderr << nodes[node].token.pos << "error: undefined " << name << " '" << nodes[node].token.str << "'\n"
    exit(1)
@@ -287,8 +306,8 @@ fn type_assert_pointer(node int) Type {
    return actual
 }
 
-assert COUNT_NODES == 17
-assert COUNT_TOKENS == 60
+assert COUNT_NODES == 18
+assert COUNT_TOKENS == 61
 fn check_const(node int) {
    match nodes[node].kind {
       NODE_ATOM => {
@@ -388,6 +407,9 @@ fn check_type(node int) {
          } else if structures_find(nodes[node].token.str, &nodes[node].token.data) {
             nodes[node].token.data = structures[nodes[node].token.data]
             nodes[node].type = type_new(TYPE_STRUCT, 0, nodes[node].token.data)
+         } else if aliases_find(nodes[node].token.str, &nodes[node].token.data) {
+            nodes[node].token.data = aliases[nodes[node].token.data]
+            nodes[node].type = type_new(nodes[nodes[nodes[node].token.data].nodes[NODE_ALIAS_TYPE]].type.kind, 0, 0)
          } else {
             error_undefined(node, "type")
          }
@@ -418,8 +440,8 @@ fn check_type(node int) {
    }
 }
 
-assert COUNT_NODES == 17
-assert COUNT_TOKENS == 60
+assert COUNT_NODES == 18
+assert COUNT_TOKENS == 61
 fn check_expr(node int, ref bool) {
    match nodes[node].kind {
       NODE_ATOM => {
@@ -703,8 +725,8 @@ fn preds_find(value int, start int, index *int) bool {
    return false
 }
 
-assert COUNT_NODES == 17
-assert COUNT_TOKENS == 60
+assert COUNT_NODES == 18
+assert COUNT_TOKENS == 61
 fn check_stmt(node int) {
    match nodes[node].kind {
       NODE_BLOCK => {
@@ -876,6 +898,23 @@ fn check_stmt(node int) {
             nodes[node].token.data = nodes[expr].token.data
             constants_push(node)
          }
+      }
+
+      NODE_ALIAS => {
+         let prev int
+         if structures_find(nodes[node].token.str, &prev) {
+            error_redefinition(node, structures[prev], "type")
+         }
+
+         if nodes[node].token.str == "nil" || nodes[node].token.str == "int" || nodes[node].token.str == "bool" || nodes[node].token.str == "char" {
+            &stderr << nodes[node].token.pos << "error: redefinition of builtin type '" << nodes[node].token.str << "'\n"
+            exit(1)
+         }
+
+         let type = nodes[node].nodes[NODE_ALIAS_TYPE]
+         check_type(type)
+
+         aliases_push(node)
       }
 
       NODE_STRUCT => {

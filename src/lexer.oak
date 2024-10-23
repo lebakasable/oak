@@ -71,6 +71,7 @@ const (
    TOKEN_FN
    TOKEN_LET
    TOKEN_CONST
+   TOKEN_ALIAS
    TOKEN_STRUCT
 
    TOKEN_USE
@@ -85,7 +86,7 @@ const (
    COUNT_TOKENS
 )
 
-assert COUNT_TOKENS == 60
+assert COUNT_TOKENS == 61
 fn str_from_token_kind(kind int) Str {
    match kind {
       TOKEN_EOF => return "end of file"
@@ -148,6 +149,7 @@ fn str_from_token_kind(kind int) Str {
       TOKEN_FN => return "keyword 'fn'"
       TOKEN_LET => return "keyword 'let'"
       TOKEN_CONST => return "keyword 'const'"
+      TOKEN_ALIAS => return "keyword 'alias'"
       TOKEN_STRUCT => return "keyword 'struct'"
 
       TOKEN_USE => return "keyword 'use'"
@@ -268,7 +270,7 @@ fn lexer_char(name Str) char {
    return ch
 }
 
-assert COUNT_TOKENS == 60
+assert COUNT_TOKENS == 61
 fn lexer_next() Token {
    if lexer.peeked {
       lexer.peeked = false
@@ -344,6 +346,8 @@ fn lexer_next() Token {
          token.kind = TOKEN_LET
       } else if token.str == "const" {
          token.kind = TOKEN_CONST
+      } else if token.str == "alias" {
+         token.kind = TOKEN_ALIAS
       } else if token.str == "struct" {
          token.kind = TOKEN_STRUCT
       } else if token.str == "use" {
