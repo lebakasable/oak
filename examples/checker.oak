@@ -34,4 +34,5 @@ fn main() {
 
    &file << "P6\n" << WIDTH << " " << HEIGHT << " 255\n"
    file_write(&file, &canvas, WIDTH*HEIGHT*3)
+   file_close(&file)
 }
