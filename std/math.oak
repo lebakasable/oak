@@ -15,3 +15,11 @@ fn max(a int, b int) int {
 fn emod(a int, b int) int {
    return (a%b + b)%b
 }
+
+fn sign(x int) int {
+   return (x > 0) as int - (x < 0) as int
+}
+
+fn abs(x int) int {
+   return sign(x)*x
+}
