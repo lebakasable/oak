@@ -116,10 +116,10 @@ fn main() {
 
    let program = program_new(&machine)
    {
-      let inst Inst
-      inst.value[0] = state_new('0', '1', RIGHT, 2)
-      inst.value[1] = state_new('1', '0', RIGHT, 0)
-      inst.value[2] = state_new('2', '1', RIGHT, 0)
+      let inst Inst let i = 0
+      inst.value[i] = state_new('0', '1', RIGHT, 2) i += 1
+      inst.value[i] = state_new('1', '0', RIGHT, 0) i += 1
+      inst.value[i] = state_new('2', '1', RIGHT, 0) i += 1
       &program << inst
    }
 
