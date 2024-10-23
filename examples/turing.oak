@@ -1,45 +1,36 @@
 use std.io
 use std.array
 
+const STATES_COUNT = 3
+
 const LEFT = -1
 const STAY = 0
 const RIGHT = 1
 
 struct State {
-   write bool
+   expected char
+   write char
    dir int
    next int
 }
 
-struct Inst {
-   expected bool
-   yes State
-   no State
+fn state_new(expected char, write char, dir int, next int) State {
+   let state State
+   state.expected = expected
+   state.write = write
+   state.dir = dir
+   state.next = next
+   return state
 }
 
-fn inst_new(expected bool, yes_write bool, yes_dir int, yes_next int, no_write bool, no_dir int, no_next int) Inst {
-   let inst Inst
-   inst.expected = expected
-   inst.yes.write = yes_write
-   inst.yes.dir = yes_dir
-   inst.yes.next = yes_next
-   inst.no.write = no_write
-   inst.no.dir = no_dir
-   inst.no.next = no_next
-   return inst
+struct Inst {
+   value [STATES_COUNT]State
 }
 
 struct Tape {
-   data *bool
+   data *char
    count int
    capacity int
-}
-
-fn tape_randomize(tape *Tape) {
-   srand(time(0 as *int))
-   for let i = 0, i < tape.count, i += 1 {
-      tape.data[i] = (real_rand()%2) as bool
-   }
 }
 
 struct Machine {
@@ -49,7 +40,7 @@ struct Machine {
 
 fn machine_new(size int) Machine {
    let machine Machine
-   machine.tape.data = malloc(size) as *bool
+   machine.tape.data = malloc(size)
    machine.tape.count = size
    machine.tape.capacity = size
    machine.head = 0
@@ -58,26 +49,29 @@ fn machine_new(size int) Machine {
 
 fn machine_execute(machine *Machine, inst Inst, insts_count int) int {
    if machine.head >= machine.tape.count {
-      *(array_push(&machine.tape.data as **char, &machine.tape.count, &machine.tape.capacity, sizeof(bool)) as *bool) = false
+      let last_sym = machine.tape.data[machine.tape.count - 1]
+      *(array_push(&machine.tape.data, &machine.tape.count, &machine.tape.capacity, sizeof(char))) = last_sym
    }
 
-   if machine.tape.data[machine.head] == inst.expected {
-      machine.tape.data[machine.head] = inst.yes.write
-      if machine.head == 0 && inst.yes.dir < 0 { return insts_count }
-      machine.head += inst.yes.dir
-      return inst.yes.next
+   for let i = 0, i < STATES_COUNT, i += 1 {
+      if machine.tape.data[machine.head] == inst.value[i].expected {
+         machine.tape.data[machine.head] = inst.value[i].write
+         if machine.head == 0 && inst.value[i].dir < 0 { return insts_count }
+         machine.head += inst.value[i].dir
+         return inst.value[i].next
+      }
    }
-   machine.tape.data[machine.head] = inst.no.write
-   if machine.head == 0 && inst.no.dir < 0 { return insts_count }
-   machine.head += inst.no.dir
-   return inst.no.next
+
+   &stderr << "error: unexpected value '" << machine.tape.data[machine.head] << "'\n"
+   exit(1)
+   return 0
 }
 
 fn machine_print(machine *Machine) {
    &stdout << "head: " << machine.head << ", "
    for let i = 0, i < machine.tape.count, i += 1 {
       if i > 0 { &stdout << " -> " }
-      &stdout << machine.tape.data[i] as int
+      &stdout << machine.tape.data[i]
    }
    &stdout << "\n"
 }
@@ -109,16 +103,25 @@ fn main() {
    let machine Machine
    if argc == 0 {
       machine = machine_new(8)
-      tape_randomize(&machine.tape)
+      srand(time(0 as *int))
+      for let i = 0, i < machine.tape.count, i += 1 {
+         machine.tape.data[i] = (real_rand()%2) as char + '0'
+      }
    } else {
       machine = machine_new(strlen(argv[0]))
       for let i = 0, i < machine.tape.count, i += 1 {
-         machine.tape.data[i] = argv[0][i] != '0'
+         machine.tape.data[i] = argv[0][i]
       }
    }
 
    let program = program_new(&machine)
-   &program << inst_new(false, true, RIGHT, 2, false, RIGHT, 0)
+   {
+      let inst Inst
+      inst.value[0] = state_new('0', '1', RIGHT, 2)
+      inst.value[1] = state_new('1', '0', RIGHT, 0)
+      inst.value[2] = state_new('2', '1', RIGHT, 0)
+      &program << inst
+   }
 
    machine_print(program.machine)
    for program.cur < program.insts_count {
