@@ -26,5 +26,8 @@ syntax keyword Keyword if else for match break return sizeof assert as use fn le
 syntax keyword Special argc argv
 syntax keyword Boolean true false
 syntax keyword Type nil int bool char
+syntax match Type "\<[A-Z][a-zA-Z0-9_]*\>"
+syntax match Constant "\<[A-Z_]\+\>"
+syntax match Function "\zs\([A-Za-z_][A-Za-z0-9_]*\)*\s*\ze\(<.*>\)\?("
 
 let b:current_syntax = "oak"
