@@ -929,6 +929,8 @@ fn check_stmt(node int) {
             exit(1)
          }
 
+         structures_push(node)
+
          let fields = nodes[node].nodes[NODE_FN_ARGS]
          for let field = fields, field != 0, field = nodes[field].next {
             check_redefinition(field, fields, "field")
@@ -936,8 +938,6 @@ fn check_stmt(node int) {
             check_type(type)
             nodes[field].type = nodes[type].type
          }
-
-         structures_push(node)
       }
 
       NODE_ASSERT => {
