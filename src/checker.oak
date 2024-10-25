@@ -635,7 +635,7 @@ fn check_expr(node Node_Index, ref bool) {
                ref_prevent(lhs, nodes[lhs].kind == NODE_CALL && type_isarray(nodes[lhs].type))
                check_expr(rhs, false)
                nodes[node].type = type_deref(type_assert_pointer(lhs))
-               type_assert(rhs, type_new(TYPE_INT, 0, 0))
+               type_assert_scalar(rhs)
             }
 
             TOKEN_ADD, TOKEN_SUB, TOKEN_MUL, TOKEN_DIV, TOKEN_MOD, TOKEN_SHL, TOKEN_SHR, TOKEN_BOR, TOKEN_BAND => {
