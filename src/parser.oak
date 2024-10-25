@@ -1,6 +1,8 @@
 use std.arena
 use src.lexer
 
+alias Node_Index int
+
 alias Type_Kind int
 const (
    TYPE_NIL
@@ -15,7 +17,7 @@ const (
 struct Type {
    kind Type_Kind
    ref int
-   data int
+   data Node_Index
 }
 
 alias Node_Kind int
@@ -98,15 +100,15 @@ struct Node {
    type Type
    token Token
 
-   nodes [4]int
-   next int
+   nodes [4]Node_Index
+   next Node_Index
 }
 
 const NODES_CAP = 16000
 let nodes [NODES_CAP]Node
 let nodes_count int
 
-fn node_new(kind Node_Kind, token Token) int {
+fn node_new(kind Node_Kind, token Token) Node_Index {
    assert nodes_count < NODES_CAP
    nodes[nodes_count].kind = kind
    nodes[nodes_count].token = token
@@ -114,7 +116,7 @@ fn node_new(kind Node_Kind, token Token) int {
    return nodes_count - 1
 }
 
-fn node_list_push(list *int, node int) *int {
+fn node_list_push(list *Node_Index, node Node_Index) *Node_Index {
    if *list != 0 {
       list = &nodes[*list].next
    }
@@ -123,7 +125,7 @@ fn node_list_push(list *int, node int) *int {
    return list
 }
 
-fn node_list_find(list int, node int) bool {
+fn node_list_find(list Node_Index, node Node_Index) bool {
    for list != 0 {
       if nodes[list].token.str == nodes[node].token.str {
          nodes[node].token.data = list
@@ -173,8 +175,8 @@ fn error_unexpected(token Token) {
 }
 
 assert COUNT_TOKENS == 61
-fn parse_const(mbp int) int {
-   let node int
+fn parse_const(mbp int) Node_Index {
+   let node Node_Index
    let token = lexer_next()
 
    match token.kind {
@@ -216,8 +218,8 @@ fn parse_const(mbp int) int {
    return node
 }
 
-fn parse_type() int {
-   let node int
+fn parse_type() Node_Index {
+   let node Node_Index
    let token = lexer_next()
    match token.kind {
       TOKEN_IDENT => node = node_new(NODE_ATOM, token)
@@ -241,8 +243,8 @@ fn parse_type() int {
 }
 
 assert COUNT_TOKENS == 61
-fn parse_expr(mbp int) int {
-   let node int
+fn parse_expr(mbp int) Node_Index {
+   let node Node_Index
    let token = lexer_next()
 
    match token.kind {
@@ -332,14 +334,14 @@ fn local_assert(token Token, expected bool) {
    }
 }
 
-fn parse_decl() int {
+fn parse_decl() Node_Index {
    let node = node_new(NODE_LET, lexer_expect(TOKEN_IDENT))
    nodes[node].token.data = parser_local as int
    nodes[node].nodes[NODE_LET_TYPE] = parse_type()
    return node
 }
 
-let tops_base int
+let tops_base Node_Index
 let tops_iter = &tops_base
 let path_arena Arena
 
@@ -368,8 +370,8 @@ fn is_operator_function_token_kind(kind Token_Kind) bool {
 }
 
 assert COUNT_TOKENS == 61
-fn parse_stmt(loop bool) int {
-   let node int
+fn parse_stmt(loop bool) Node_Index {
+   let node Node_Index
    let token = lexer_next()
 
    match token.kind {

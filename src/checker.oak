@@ -2,7 +2,7 @@ use src.parser
 
 assert COUNT_NODES == 18
 assert COUNT_TOKENS == 61
-fn eval_const_unary(node int) {
+fn eval_const_unary(node Node_Index) {
    let expr = nodes[node].nodes[NODE_UNARY_EXPR]
 
    match nodes[node].token.kind {
@@ -15,7 +15,7 @@ fn eval_const_unary(node int) {
 
 assert COUNT_NODES == 18
 assert COUNT_TOKENS == 61
-fn eval_const_binary(node int) {
+fn eval_const_binary(node Node_Index) {
    let lhs = nodes[node].nodes[NODE_BINARY_LHS]
    let rhs = nodes[node].nodes[NODE_BINARY_RHS]
 
@@ -82,7 +82,7 @@ fn type_isarray(type Type) bool {
    return type.kind == TYPE_ARRAY && type.ref == 0
 }
 
-fn type_new(kind Type_Kind, ref int, data int) Type {
+fn type_new(kind Type_Kind, ref int, data Node_Index) Type {
    let type Type
    type.kind = kind
    type.ref = ref
@@ -126,10 +126,10 @@ fn [<<](f *File, type Type) *File {
 
 const SCOPE_CAP = 1024
 
-let constants [SCOPE_CAP]int
+let constants [SCOPE_CAP]Node_Index
 let constants_count int
 
-fn constants_push(node int) {
+fn constants_push(node Node_Index) {
    assert constants_count < SCOPE_CAP
    constants[constants_count] = node
    constants_count += 1
@@ -145,10 +145,10 @@ fn constants_find(name Str, index *int) bool {
    return false
 }
 
-let variables [SCOPE_CAP]int
+let variables [SCOPE_CAP]Node_Index
 let variables_count int
 
-fn variables_push(node int) {
+fn variables_push(node Node_Index) {
    assert variables_count < SCOPE_CAP
    variables[variables_count] = node
    variables_count += 1
@@ -165,7 +165,7 @@ fn variables_find(name Str, index *int) bool {
 }
 
 struct Function {
-   node int
+   node Node_Index
    args int
    vars int
 
@@ -177,7 +177,7 @@ let functions [SCOPE_CAP]Function
 let functions_count int
 let functions_current int
 
-fn functions_push(node int, arity int) {
+fn functions_push(node Node_Index, arity int) {
    assert functions_count < SCOPE_CAP
    functions[functions_count].node = node
    functions[functions_count].arity = arity
@@ -194,7 +194,7 @@ fn functions_find(name Str, index *int) bool {
    return false
 }
 
-fn operator_functions_find(kind Token_Kind, lhs int, rhs int, index *int) bool {
+fn operator_functions_find(kind Token_Kind, lhs Node_Index, rhs Node_Index, index *int) bool {
    for let i = 0, i < functions_count, i += 1 {
       let func = functions[i].node
       if nodes[func].token.kind == kind && nodes[nodes[func].nodes[NODE_FN_ARGS]].type == nodes[lhs].type && nodes[nodes[nodes[func].nodes[NODE_FN_ARGS]].next].type == nodes[rhs].type {
@@ -205,10 +205,10 @@ fn operator_functions_find(kind Token_Kind, lhs int, rhs int, index *int) bool {
    return false
 }
 
-let structures [SCOPE_CAP]int
+let structures [SCOPE_CAP]Node_Index
 let structures_count int
 
-fn structures_push(node int) {
+fn structures_push(node Node_Index) {
    assert structures_count < SCOPE_CAP
    structures[structures_count] = node
    structures_count += 1
@@ -224,10 +224,10 @@ fn structures_find(name Str, index *int) bool {
    return false
 }
 
-let aliases [SCOPE_CAP]int
+let aliases [SCOPE_CAP]Node_Index
 let aliases_count int
 
-fn aliases_push(node int) {
+fn aliases_push(node Node_Index) {
    assert aliases_count < SCOPE_CAP
    aliases[aliases_count] = node
    aliases_count += 1
@@ -243,18 +243,18 @@ fn aliases_find(name Str, index *int) bool {
    return false
 }
 
-fn error_undefined(node int, name Str) {
+fn error_undefined(node Node_Index, name Str) {
    &stderr << nodes[node].token.pos << "error: undefined " << name << " '" << nodes[node].token.str << "'\n"
    exit(1)
 }
 
-fn error_redefinition(node int, prev int, name Str) {
+fn error_redefinition(node Node_Index, prev Node_Index, name Str) {
    &stderr << nodes[node].token.pos << "error: redefinition of " << name << " '" << nodes[node].token.str << "'\n"
    &stderr << nodes[prev].token.pos << "note: defined here\n"
    exit(1)
 }
 
-fn check_redefinition(node int, list int, name Str) {
+fn check_redefinition(node Node_Index, list Node_Index, name Str) {
    for list != 0 && list != node {
       if nodes[list].token.str == nodes[node].token.str {
          error_redefinition(node, list, name)
@@ -263,14 +263,14 @@ fn check_redefinition(node int, list int, name Str) {
    }
 }
 
-fn ref_prevent(node int, ref bool) {
+fn ref_prevent(node Node_Index, ref bool) {
    if ref {
       &stderr << nodes[node].token.pos << "error: cannot take reference to value not in memory\n"
       exit(1)
    }
 }
 
-fn type_assert(node int, expected Type) Type {
+fn type_assert(node Node_Index, expected Type) Type {
    let actual = nodes[node].type
    if actual != expected {
       &stderr << nodes[node].token.pos << "error: expected type '" << expected << "', got '" << actual << "'\n"
@@ -279,7 +279,7 @@ fn type_assert(node int, expected Type) Type {
    return actual
 }
 
-fn type_assert_arith(node int) Type {
+fn type_assert_arith(node Node_Index) Type {
    let actual = nodes[node].type
    if actual.kind != TYPE_INT && actual.kind != TYPE_CHAR && actual.ref == 0 {
       &stderr << nodes[node].token.pos << "error: expected arithmetic type, got '" << actual <<  "'\n"
@@ -288,7 +288,7 @@ fn type_assert_arith(node int) Type {
    return actual
 }
 
-fn type_assert_scalar(node int) Type {
+fn type_assert_scalar(node Node_Index) Type {
    let actual = nodes[node].type
    if actual.kind != TYPE_INT && actual.kind != TYPE_BOOL && actual.kind != TYPE_CHAR && actual.ref == 0 {
       &stderr << nodes[node].token.pos << "error: expected scalar type, got '" << actual << "'\n"
@@ -297,7 +297,7 @@ fn type_assert_scalar(node int) Type {
    return actual
 }
 
-fn type_assert_pointer(node int) Type {
+fn type_assert_pointer(node Node_Index) Type {
    let actual = nodes[node].type
    if actual.ref == 0 && actual.kind != TYPE_ARRAY {
       &stderr << nodes[node].token.pos << "error: expected pointer type, got '" << actual << "'\n"
@@ -308,7 +308,7 @@ fn type_assert_pointer(node int) Type {
 
 assert COUNT_NODES == 18
 assert COUNT_TOKENS == 61
-fn check_const(node int) {
+fn check_const(node Node_Index) {
    match nodes[node].kind {
       NODE_ATOM => {
          match nodes[node].token.kind {
@@ -395,7 +395,7 @@ fn check_const(node int) {
 }
 
 assert COUNT_TYPES == 6
-fn check_type(node int) {
+fn check_type(node Node_Index) {
    match nodes[node].kind {
       NODE_ATOM => {
          if nodes[node].token.str == "int" {
@@ -443,7 +443,7 @@ fn check_type(node int) {
 
 assert COUNT_NODES == 18
 assert COUNT_TOKENS == 61
-fn check_expr(node int, ref bool) {
+fn check_expr(node Node_Index, ref bool) {
    match nodes[node].kind {
       NODE_ATOM => {
          match nodes[node].token.kind {
@@ -702,14 +702,14 @@ fn check_expr(node int, ref bool) {
 }
 
 struct Pred {
-   node int
+   node Node_Index
    value int
 }
 
 let preds [SCOPE_CAP]Pred
 let preds_count int
 
-fn preds_push(node int) {
+fn preds_push(node Node_Index) {
    assert preds_count < SCOPE_CAP
    preds[preds_count].node = node
    preds[preds_count].value = nodes[node].token.data
@@ -728,7 +728,7 @@ fn preds_find(value int, start int, index *int) bool {
 
 assert COUNT_NODES == 18
 assert COUNT_TOKENS == 61
-fn check_stmt(node int) {
+fn check_stmt(node Node_Index) {
    match nodes[node].kind {
       NODE_BLOCK => {
          let constants_count_save = constants_count

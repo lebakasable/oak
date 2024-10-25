@@ -221,7 +221,7 @@ fn global_alloc(size int) int {
    return global_size - size
 }
 
-fn compile_ref(node int) {
+fn compile_ref(node Node_Index) {
    if nodes[node].token.data & 1 == 1 {
       ops_push(OP_LPTR, nodes[node].token.data & ~1)
    } else {
@@ -231,7 +231,7 @@ fn compile_ref(node int) {
 
 assert COUNT_NODES == 18
 assert COUNT_TOKENS == 61
-fn compile_expr(node int, ref bool) {
+fn compile_expr(node Node_Index, ref bool) {
    match nodes[node].kind {
       NODE_ATOM => {
          match nodes[node].token.kind {
@@ -559,7 +559,7 @@ let branch_jumps Jumps
 
 assert COUNT_NODES == 18
 assert COUNT_TOKENS == 61
-fn compile_stmt(node int) {
+fn compile_stmt(node Node_Index) {
    match nodes[node].kind {
       NODE_BLOCK => {
          let local_size_save = local_size
