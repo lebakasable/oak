@@ -98,8 +98,8 @@ struct Node {
    type Type
    token Token
 
-   nodes [4]Node_Kind
-   next Node_Kind
+   nodes [4]int
+   next int
 }
 
 const NODES_CAP = 16000
