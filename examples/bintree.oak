@@ -39,20 +39,67 @@ fn invert_tree(root Node_Index) Node_Index {
    return 0
 }
 
-fn print_tree(root Node_Index, level int) {
+fn print_tree_rec(root Node_Index, level int) {
    if root != 0 {
-      print_tree(nodes[root].left, level + 1)
+      print_tree_rec(nodes[root].left, level + 1)
       for let i = 0, i < level, i += 1 {
          &stdout << "  "
       }
       &stdout << nodes[root].value << "\n"
-      print_tree(nodes[root].right, level + 1)
+      print_tree_rec(nodes[root].right, level + 1)
+   }
+}
+
+alias Action_Kind int
+const (
+   ACTION_CALL
+   ACTION_HANDLE
+)
+
+struct Action {
+   kind Action_Kind
+   root Node_Index
+   level int
+}
+
+fn print_tree_nonrec(root Node_Index) {
+   const STACK_CAP = 1024
+   let stack [STACK_CAP]Action
+   let stack_count = 0
+   stack[stack_count].kind = ACTION_CALL
+   stack[stack_count].root = root
+   stack[stack_count].level = 0
+   stack_count += 1
+   for stack_count > 0 {
+      assert stack_count < STACK_CAP
+      stack_count -= 1
+      let action = stack[stack_count]
+      match action.kind {
+         ACTION_CALL => if action.root != 0 {
+            stack[stack_count].kind = ACTION_CALL
+            stack[stack_count].root = nodes[action.root].right
+            stack[stack_count].level = action.level + 1
+            stack_count += 1
+            stack[stack_count].kind = ACTION_HANDLE
+            stack[stack_count].root = action.root
+            stack[stack_count].level = action.level
+            stack_count += 1
+            stack[stack_count].kind = ACTION_CALL
+            stack[stack_count].root = nodes[action.root].left
+            stack[stack_count].level = action.level + 1
+            stack_count += 1
+         }
+         ACTION_HANDLE => {
+            for let i = 0, i < action.level, i += 1 {
+               &stdout << "  "
+            }
+            &stdout << nodes[action.root].value << "\n"
+         }
+      }
    }
 }
 
 fn main() {
    let tree = generate_tree(3)
-   print_tree(tree, 0)
-   &stdout << "------------------------------\n"
-   print_tree(invert_tree(tree), 0)
+   print_tree_nonrec(tree)
 }
