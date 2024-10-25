@@ -1,0 +1,58 @@
+use std.io
+
+alias Node_Index int
+
+struct Node {
+   value int
+   left Node_Index
+   right Node_Index
+}
+
+const NODES_CAP = 1024
+let nodes [NODES_CAP]Node
+let nodes_count = 1
+
+fn node_new(value Node_Index) Node_Index {
+   assert nodes_count < NODES_CAP
+   nodes[nodes_count].value = value
+   nodes_count += 1
+   return nodes_count - 1
+}
+
+fn generate_tree(level Node_Index) Node_Index {
+   if level > 0 {
+      let node = node_new(nodes_count)
+      nodes[node].left = generate_tree(level - 1)
+      nodes[node].right = generate_tree(level - 1)
+      return node
+   }
+   return 0
+}
+
+fn invert_tree(root Node_Index) Node_Index {
+   if root != 0 {
+      let node = node_new(nodes[root].value)
+      nodes[node].left = invert_tree(nodes[root].right)
+      nodes[node].right = invert_tree(nodes[root].left)
+      return node
+   }
+   return 0
+}
+
+fn print_tree(root Node_Index, level int) {
+   if root != 0 {
+      print_tree(nodes[root].left, level + 1)
+      for let i = 0, i < level, i += 1 {
+         &stdout << "  "
+      }
+      &stdout << nodes[root].value << "\n"
+      print_tree(nodes[root].right, level + 1)
+   }
+}
+
+fn main() {
+   let tree = generate_tree(3)
+   print_tree(tree, 0)
+   &stdout << "------------------------------\n"
+   print_tree(invert_tree(tree), 0)
+}
