@@ -1,4 +1,5 @@
 use std.io
+use std.array
 
 alias Node_Index int
 
@@ -29,11 +30,11 @@ fn generate_tree(level Node_Index) Node_Index {
    return 0
 }
 
-fn invert_tree(root Node_Index) Node_Index {
+fn invert_tree_rec(root Node_Index) Node_Index {
    if root != 0 {
       let node = node_new(nodes[root].value)
-      nodes[node].left = invert_tree(nodes[root].right)
-      nodes[node].right = invert_tree(nodes[root].left)
+      nodes[node].left = invert_tree_rec(nodes[root].right)
+      nodes[node].right = invert_tree_rec(nodes[root].left)
       return node
    }
    return 0
@@ -62,32 +63,82 @@ struct Action {
    level int
 }
 
-fn print_tree_nonrec(root Node_Index) {
-   const STACK_CAP = 1024
-   let stack [STACK_CAP]Action
-   let stack_count = 0
-   stack[stack_count].kind = ACTION_CALL
-   stack[stack_count].root = root
-   stack[stack_count].level = 0
-   stack_count += 1
-   for stack_count > 0 {
-      assert stack_count < STACK_CAP
-      stack_count -= 1
-      let action = stack[stack_count]
+fn action_new(kind Action_Kind, root Node_Index, level int) Action {
+   let action Action
+   action.kind = kind
+   action.root = root
+   action.level = level
+   return action
+}
+
+struct Action_Stack {
+   data *Action
+   count int
+   capacity int
+}
+
+fn action_stack_new() Action_Stack {
+   let stack Action_Stack
+   stack.data = 0 as *Action
+   stack.count = 0
+   stack.capacity = 0
+   return stack
+}
+
+fn [<<](stack *Action_Stack, action Action) *Action_Stack {
+   *(array_push(&stack.data as **char, &stack.count, &stack.capacity, sizeof(Action)) as *Action) = action
+   return stack
+}
+
+fn action_stack_pop(stack *Action_Stack) Action {
+   stack.count -= 1
+   return stack.data[stack.count]
+}
+
+fn invert_tree_nonrec(root Node_Index) Node_Index {
+   let arg_stack = action_stack_new()
+   &arg_stack << action_new(ACTION_CALL, root, 0)
+   let ret_stack [1024]Node_Index
+   let ret_stack_count = 0
+   for arg_stack.count > 0 {
+      let action = action_stack_pop(&arg_stack)
       match action.kind {
          ACTION_CALL => if action.root != 0 {
-            stack[stack_count].kind = ACTION_CALL
-            stack[stack_count].root = nodes[action.root].right
-            stack[stack_count].level = action.level + 1
-            stack_count += 1
-            stack[stack_count].kind = ACTION_HANDLE
-            stack[stack_count].root = action.root
-            stack[stack_count].level = action.level
-            stack_count += 1
-            stack[stack_count].kind = ACTION_CALL
-            stack[stack_count].root = nodes[action.root].left
-            stack[stack_count].level = action.level + 1
-            stack_count += 1
+            &arg_stack << action_new(ACTION_HANDLE, action.root, 0)
+            &arg_stack << action_new(ACTION_CALL, nodes[action.root].right, 0)
+            &arg_stack << action_new(ACTION_CALL, nodes[action.root].left, 0)
+         } else {
+            ret_stack[ret_stack_count] = 0
+            ret_stack_count += 1
+         }
+         ACTION_HANDLE => {
+            ret_stack_count -= 1
+            let left = ret_stack[ret_stack_count]
+            ret_stack_count -= 1
+            let right = ret_stack[ret_stack_count]
+            let ret = node_new(nodes[action.root].value)
+            nodes[ret].left = left
+            nodes[ret].right = right
+            ret_stack[ret_stack_count] = ret
+            ret_stack_count += 1
+         }
+      }
+   }
+
+   ret_stack_count -= 1
+   return ret_stack[ret_stack_count]
+}
+
+fn print_tree_nonrec(root Node_Index) {
+   let stack = action_stack_new()
+   &stack << action_new(ACTION_CALL, root, 0)
+   for stack.count > 0 {
+      let action = action_stack_pop(&stack)
+      match action.kind {
+         ACTION_CALL => if action.root != 0 {
+            &stack << action_new(ACTION_CALL, nodes[action.root].right, action.level + 1)
+            &stack << action_new(ACTION_HANDLE, action.root, action.level)
+            &stack << action_new(ACTION_CALL, nodes[action.root].left, action.level + 1)
          }
          ACTION_HANDLE => {
             for let i = 0, i < action.level, i += 1 {
@@ -102,4 +153,6 @@ fn print_tree_nonrec(root Node_Index) {
 fn main() {
    let tree = generate_tree(3)
    print_tree_nonrec(tree)
+   &stdout << "------------------------------\n"
+   print_tree_nonrec(invert_tree_nonrec(tree))
 }
