@@ -620,11 +620,10 @@ fn check_expr(node Node_Index, ref bool) {
                let real = nodes[lhs].type.data
                if !node_list_find(nodes[real].nodes[NODE_STRUCT_FIELDS], rhs) {
                   &stderr << nodes[rhs].token.pos << "error: undefined field '" << nodes[rhs].token.str << "' in structure '" << nodes[real].token.str << "'\n"
-
                   if nodes[real].token.pos.path.size != 0 {
                      &stderr << nodes[real].token.pos << "note: defined here\n"
-                     exit(1)
                   }
+                  exit(1)
                }
 
                nodes[node].type = nodes[nodes[rhs].token.data].type
