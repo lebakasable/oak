@@ -1,0 +1,100 @@
+const FRUITS_CAP = 93 
+let fruits [FRUITS_CAP]Str
+
+fn fruits_init() {
+   let i = 0
+   fruits[i] = "Apple"             i += 1
+   fruits[i] = "Apricot"           i += 1
+   fruits[i] = "Avocado"           i += 1
+   fruits[i] = "Banana"            i += 1
+   fruits[i] = "Bilberry"          i += 1
+   fruits[i] = "Blackberry"        i += 1
+   fruits[i] = "Blackcurrant"      i += 1
+   fruits[i] = "Blueberry"         i += 1
+   fruits[i] = "Boysenberry"       i += 1
+   fruits[i] = "Currant"           i += 1
+   fruits[i] = "Cherry"            i += 1
+   fruits[i] = "Cherimoya"         i += 1
+   fruits[i] = "Chico fruit"       i += 1
+   fruits[i] = "Cloudberry"        i += 1
+   fruits[i] = "Coconut"           i += 1
+   fruits[i] = "Cranberry"         i += 1
+   fruits[i] = "Cucumber"          i += 1
+   fruits[i] = "Custard apple"     i += 1
+   fruits[i] = "Damson"            i += 1
+   fruits[i] = "Date"              i += 1
+   fruits[i] = "Dragonfruit"       i += 1
+   fruits[i] = "Durian"            i += 1
+   fruits[i] = "Elderberry"        i += 1
+   fruits[i] = "Feijoa"            i += 1
+   fruits[i] = "Fig"               i += 1
+   fruits[i] = "Goji berry"        i += 1
+   fruits[i] = "Gooseberry"        i += 1
+   fruits[i] = "Grape"             i += 1
+   fruits[i] = "Raisin"            i += 1
+   fruits[i] = "Grapefruit"        i += 1
+   fruits[i] = "Guava"             i += 1
+   fruits[i] = "Honeyberry"        i += 1
+   fruits[i] = "Huckleberry"       i += 1
+   fruits[i] = "Jabuticaba"        i += 1
+   fruits[i] = "Jackfruit"         i += 1
+   fruits[i] = "Jambul"            i += 1
+   fruits[i] = "Jujube"            i += 1
+   fruits[i] = "Juniper berry"     i += 1
+   fruits[i] = "Kiwano"            i += 1
+   fruits[i] = "Kiwifruit"         i += 1
+   fruits[i] = "Kumquat"           i += 1
+   fruits[i] = "Lemon"             i += 1
+   fruits[i] = "Lime"              i += 1
+   fruits[i] = "Loquat"            i += 1
+   fruits[i] = "Longan"            i += 1
+   fruits[i] = "Lychee"            i += 1
+   fruits[i] = "Mango"             i += 1
+   fruits[i] = "Mangosteen"        i += 1
+   fruits[i] = "Marionberry"       i += 1
+   fruits[i] = "Melon"             i += 1
+   fruits[i] = "Cantaloupe"        i += 1
+   fruits[i] = "Honeydew"          i += 1
+   fruits[i] = "Watermelon"        i += 1
+   fruits[i] = "Miracle fruit"     i += 1
+   fruits[i] = "Mulberry"          i += 1
+   fruits[i] = "Nectarine"         i += 1
+   fruits[i] = "Nance"             i += 1
+   fruits[i] = "Olive"             i += 1
+   fruits[i] = "Orange"            i += 1
+   fruits[i] = "Blood orange"      i += 1
+   fruits[i] = "Clementine"        i += 1
+   fruits[i] = "Mandarine"         i += 1
+   fruits[i] = "Tangerine"         i += 1
+   fruits[i] = "Papaya"            i += 1
+   fruits[i] = "Passionfruit"      i += 1
+   fruits[i] = "Peach"             i += 1
+   fruits[i] = "Pear"              i += 1
+   fruits[i] = "Persimmon"         i += 1
+   fruits[i] = "Physalis"          i += 1
+   fruits[i] = "Plantain"          i += 1
+   fruits[i] = "Plum"              i += 1
+   fruits[i] = "Prune"             i += 1
+   fruits[i] = "Pineapple"         i += 1
+   fruits[i] = "Plumcot"           i += 1
+   fruits[i] = "Pomegranate"       i += 1
+   fruits[i] = "Pomelo"            i += 1
+   fruits[i] = "Purple mangosteen" i += 1
+   fruits[i] = "Quince"            i += 1
+   fruits[i] = "Raspberry"         i += 1
+   fruits[i] = "Salmonberry"       i += 1
+   fruits[i] = "Rambutan"          i += 1
+   fruits[i] = "Redcurrant"        i += 1
+   fruits[i] = "Salal berry"       i += 1
+   fruits[i] = "Salak"             i += 1
+   fruits[i] = "Satsuma"           i += 1
+   fruits[i] = "Soursop"           i += 1
+   fruits[i] = "Star fruit"        i += 1
+   fruits[i] = "Solanum quitoense" i += 1
+   fruits[i] = "Strawberry"        i += 1
+   fruits[i] = "Tamarillo"         i += 1
+   fruits[i] = "Tamarind"          i += 1
+   fruits[i] = "Ugli fruit"        i += 1
+   fruits[i] = "Yuzu"              i += 1
+   assert i == FRUITS_CAP
+}

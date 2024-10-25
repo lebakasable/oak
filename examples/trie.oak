@@ -1,0 +1,98 @@
+use std.io
+use std.cmd
+use std.arena
+use examples.fruits
+
+alias Node_Index int
+
+struct Node {
+   children [256]Node_Index
+}
+
+const NODES_CAP = 1024
+let nodes [NODES_CAP]Node
+let nodes_count = 1
+
+fn node_new() Node_Index {
+   assert nodes_count < NODES_CAP
+   nodes_count += 1
+   return nodes_count - 1
+}
+
+fn insert_text(root Node_Index, text Str) {
+   if text.size == 0 {
+      return
+   }
+
+   assert root != 0
+
+   if nodes[root].children[*text.data] == 0 {
+      nodes[root].children[*text.data] = node_new()
+   }
+
+   insert_text(nodes[root].children[*text.data], str_drop_left(text, 1))
+}
+
+fn print_dot(root Node_Index, file *File) {
+   for let i = 0, i < 256, i += 1 {
+      let child = nodes[root].children[i]
+      if child != 0 {
+         file << "   Node_" << child << " [label=\"" << i as char << "\"]" << "\n"
+         file << "   Node_" << root << " -> Node_" << child << "\n"
+         print_dot(child, file)
+      }
+   }
+}
+
+fn main() {
+   if argc == 0 {
+      &stderr << "Usage: trie.oak OUTPUT\n"
+      &stderr << "error: output path not provided\n"
+      exit(1)
+   }
+   let dot_file_path = argv[0]
+
+   fruits_init()
+
+   let root = node_new()
+   for let i = 0, i < 10, i += 1 {
+      insert_text(root, fruits[i])
+   }
+
+   let dot_file File
+   file_create(&dot_file, dot_file_path)
+
+   &dot_file << "digraph Trie {\n"
+   &dot_file << "   Node_" << root << " [label=root]\n"
+   print_dot(root, &dot_file)
+   &dot_file << "}\n"
+
+   file_close(&dot_file)
+
+   let dot_out Str
+   let dot_err Str
+
+   let args [4]*char
+   args[0] = "/usr/bin/dot"c
+   args[1] = "-Tsvg"c
+   args[2] = dot_file_path
+   args[3] = 0 as *char
+   if capture_command(&args as **char, &dot_out, &dot_err) != 0 {
+      &stderr << dot_err
+      exit(1)
+   }
+
+   let dot_file_path_str = str_from_cstr(dot_file_path)
+   let dot_file_name = str_split_by(&dot_file_path_str, '.')
+   let svg_file_path Arena
+   &svg_file_path << dot_file_name
+   &svg_file_path << ".svg"
+   &svg_file_path << '\0'
+
+   let svg_file File
+   file_create(&svg_file, &svg_file_path.data as *char)
+
+   &svg_file << dot_out
+
+   file_close(&svg_file)
+}
