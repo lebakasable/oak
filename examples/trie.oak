@@ -8,7 +8,7 @@ fn usage(f *File) {
    f << "  trie.oak CMD\n\n"
    f << "Commands:\n"
    f << "  help                   Print this help and exit\n"
-   f << "  dot FILE               Generate tree Graphviz graph into file\n"
+   f << "  dot                    Generate tree graph\n"
    f << "  complete PREFIX        Suggest prefix autocompletion based on tree\n"
 }
 
@@ -41,6 +41,7 @@ fn arg_next(name Str) Str {
 alias Node_Index int
 
 struct Node {
+   end bool
    children [256]Node_Index
 }
 
@@ -55,11 +56,12 @@ fn node_new() Node_Index {
 }
 
 fn insert_text(root Node_Index, text Str) {
+   assert root != 0
+
    if text.size == 0 {
+      nodes[root].end = true
       return
    }
-
-   assert root != 0
 
    if nodes[root].children[*text.data] == 0 {
       nodes[root].children[*text.data] = node_new()
@@ -68,13 +70,43 @@ fn insert_text(root Node_Index, text Str) {
    insert_text(nodes[root].children[*text.data], str_drop_left(text, 1))
 }
 
-fn print_dot(root Node_Index, file *File) {
+let ac_buffer Arena
+
+fn find_prefix(root Node_Index, prefix Str) Node_Index {
+   if prefix.size == 0 {
+      return root
+   }
+
+   if root == 0 {
+      return 0
+   }
+
+   &ac_buffer << *prefix.data
+   return find_prefix(nodes[root].children[*prefix.data], str_drop_left(prefix, 1))
+}
+
+fn print_autocompletion(file *File, root Node_Index) {
+   if nodes[root].end {
+      file_write(file, &ac_buffer.data as *char, ac_buffer.size)
+      file << '\n'
+   }
+
+   for let i = 0, i < 256, i += 1 {
+      if nodes[root].children[i] != 0 {
+         &ac_buffer << i as char
+         print_autocompletion(file, nodes[root].children[i])
+         ac_buffer.size -= 1
+      }
+   }
+}
+
+fn generate_dot(file *File, root Node_Index) {
    for let i = 0, i < 256, i += 1 {
       let child = nodes[root].children[i]
       if child != 0 {
          file << "   Node_" << child << " [label=\"" << i as char << "\"]" << "\n"
          file << "   Node_" << root << " -> Node_" << child << "\n"
-         print_dot(child, file)
+         generate_dot(file, child) 
       }
    }
 }
@@ -82,7 +114,7 @@ fn print_dot(root Node_Index, file *File) {
 fn main() {
    let root = node_new()
    fruits_init()
-   for let i = 0, i < 10, i += 1 {
+   for let i = 0, i < FRUITS_CAP, i += 1 {
       insert_text(root, fruits[i])
    }
 
@@ -91,47 +123,14 @@ fn main() {
       usage(&stdout)
       exit(0)
    } else if command == "dot" {
-      let dot_file_path = arg_next_cstr("file")
-
-      let dot_file File
-      file_create(&dot_file, dot_file_path)
-
-      &dot_file << "digraph Trie {\n"
-      &dot_file << "   Node_" << root << " [label=root]\n"
-      print_dot(root, &dot_file)
-      &dot_file << "}\n"
-
-      file_close(&dot_file)
-
-      let dot_out Str
-      let dot_err Str
-
-      let args [4]*char
-      args[0] = "/usr/bin/dot"c
-      args[1] = "-Tsvg"c
-      args[2] = dot_file_path
-      args[3] = 0 as *char
-      if capture_command(&args as **char, &dot_out, &dot_err) != 0 {
-         &stderr << dot_err
-         exit(1)
-      }
-
-      let dot_file_path_str = str_from_cstr(dot_file_path)
-      let dot_file_name = str_split_by(&dot_file_path_str, '.')
-      let svg_file_path Arena
-      &svg_file_path << dot_file_name
-      &svg_file_path << ".svg"
-      &svg_file_path << '\0'
-
-      let svg_file File
-      file_create(&svg_file, &svg_file_path.data as *char)
-
-      &svg_file << dot_out
-
-      file_close(&svg_file)
+      &stdout << "digraph Trie {\n"
+      &stdout << "   Node_" << root << " [label=root]\n"
+      generate_dot(&stdout, root)
+      &stdout << "}\n"
    } else if command == "complete" {
       let prefix = arg_next("prefix")
-      &stdout << prefix << "\n"
+      let subtree = find_prefix(root, prefix)
+      print_autocompletion(&stdout, subtree)
    } else {
       usage(&stdout)
       &stderr << "\nerror: invalid command '" << command << "'\n"
