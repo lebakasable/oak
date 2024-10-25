@@ -3,6 +3,41 @@ use std.cmd
 use std.arena
 use examples.fruits
 
+fn usage(f *File) {
+   f << "Usage:\n"
+   f << "  trie.oak CMD\n\n"
+   f << "Commands:\n"
+   f << "  help                   Print this help and exit\n"
+   f << "  dot FILE               Generate tree Graphviz graph into file\n"
+   f << "  complete PREFIX        Suggest prefix autocompletion based on tree\n"
+}
+
+const ARGS_CAP = 1024
+let args [ARGS_CAP]*char
+let args_count int
+let args_start int
+
+fn args_push(item *char) {
+   assert args_count < ARGS_CAP
+   args[args_count] = item
+   args_count += 1
+}
+
+fn arg_next_cstr(name Str) *char {
+   if args_start == argc {
+      usage(&stderr)
+      &stderr << "\nerror: " << name << " not provided\n"
+      exit(1)
+   }
+
+   args_start += 1
+   return argv[args_start - 1]
+}
+
+fn arg_next(name Str) Str {
+   return str_from_cstr(arg_next_cstr(name))
+}
+
 alias Node_Index int
 
 struct Node {
@@ -45,54 +80,61 @@ fn print_dot(root Node_Index, file *File) {
 }
 
 fn main() {
-   if argc == 0 {
-      &stderr << "Usage: trie.oak OUTPUT\n"
-      &stderr << "error: output path not provided\n"
-      exit(1)
-   }
-   let dot_file_path = argv[0]
-
-   fruits_init()
-
    let root = node_new()
+   fruits_init()
    for let i = 0, i < 10, i += 1 {
       insert_text(root, fruits[i])
    }
 
-   let dot_file File
-   file_create(&dot_file, dot_file_path)
+   let command = arg_next("command")
+   if command == "help" {
+      usage(&stdout)
+      exit(0)
+   } else if command == "dot" {
+      let dot_file_path = arg_next_cstr("file")
 
-   &dot_file << "digraph Trie {\n"
-   &dot_file << "   Node_" << root << " [label=root]\n"
-   print_dot(root, &dot_file)
-   &dot_file << "}\n"
+      let dot_file File
+      file_create(&dot_file, dot_file_path)
 
-   file_close(&dot_file)
+      &dot_file << "digraph Trie {\n"
+      &dot_file << "   Node_" << root << " [label=root]\n"
+      print_dot(root, &dot_file)
+      &dot_file << "}\n"
 
-   let dot_out Str
-   let dot_err Str
+      file_close(&dot_file)
 
-   let args [4]*char
-   args[0] = "/usr/bin/dot"c
-   args[1] = "-Tsvg"c
-   args[2] = dot_file_path
-   args[3] = 0 as *char
-   if capture_command(&args as **char, &dot_out, &dot_err) != 0 {
-      &stderr << dot_err
+      let dot_out Str
+      let dot_err Str
+
+      let args [4]*char
+      args[0] = "/usr/bin/dot"c
+      args[1] = "-Tsvg"c
+      args[2] = dot_file_path
+      args[3] = 0 as *char
+      if capture_command(&args as **char, &dot_out, &dot_err) != 0 {
+         &stderr << dot_err
+         exit(1)
+      }
+
+      let dot_file_path_str = str_from_cstr(dot_file_path)
+      let dot_file_name = str_split_by(&dot_file_path_str, '.')
+      let svg_file_path Arena
+      &svg_file_path << dot_file_name
+      &svg_file_path << ".svg"
+      &svg_file_path << '\0'
+
+      let svg_file File
+      file_create(&svg_file, &svg_file_path.data as *char)
+
+      &svg_file << dot_out
+
+      file_close(&svg_file)
+   } else if command == "complete" {
+      let prefix = arg_next("prefix")
+      &stdout << prefix << "\n"
+   } else {
+      usage(&stdout)
+      &stderr << "\nerror: invalid command '" << command << "'\n"
       exit(1)
    }
-
-   let dot_file_path_str = str_from_cstr(dot_file_path)
-   let dot_file_name = str_split_by(&dot_file_path_str, '.')
-   let svg_file_path Arena
-   &svg_file_path << dot_file_name
-   &svg_file_path << ".svg"
-   &svg_file_path << '\0'
-
-   let svg_file File
-   file_create(&svg_file, &svg_file_path.data as *char)
-
-   &svg_file << dot_out
-
-   file_close(&svg_file)
 }
