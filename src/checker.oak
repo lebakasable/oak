@@ -696,6 +696,19 @@ fn check_expr(node Node_Index, ref bool) {
          }
       }
 
+      NODE_IF => {
+         let cond = nodes[node].nodes[NODE_IF_COND]
+         check_expr(cond, false)
+         type_assert(cond, type_new(TYPE_BOOL, 0, 0))
+
+         let then = nodes[node].nodes[NODE_IF_THEN]
+         check_expr(then, false)
+         check_expr(nodes[node].nodes[NODE_IF_ELSE], false)
+         type_assert(nodes[node].nodes[NODE_IF_ELSE], nodes[then].type)
+
+         nodes[node].type = nodes[then].type
+      }
+
       else => assert false
    }
 }

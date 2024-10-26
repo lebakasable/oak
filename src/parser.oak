@@ -289,6 +289,17 @@ fn parse_expr(mbp int) Node_Index {
          lexer_expect(TOKEN_RPAREN)
       }
 
+      TOKEN_IF => {
+         node = node_new(NODE_IF, token)
+         lexer_expect(TOKEN_LPAREN)
+         nodes[node].nodes[NODE_IF_COND] = parse_expr(POWER_SET)
+         lexer_expect(TOKEN_COMMA)
+         nodes[node].nodes[NODE_IF_THEN] = parse_expr(POWER_SET)
+         lexer_expect(TOKEN_COMMA)
+         nodes[node].nodes[NODE_IF_ELSE] = parse_expr(POWER_SET)
+         lexer_expect(TOKEN_RPAREN)
+      }
+
       else => error_unexpected(token)
    }
 

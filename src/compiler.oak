@@ -529,8 +529,21 @@ fn compile_expr(node Node_Index, ref bool) {
          }
       }
 
-      else =>
-         assert false
+      NODE_IF => {
+         compile_expr(nodes[node].nodes[NODE_IF_COND], false)
+
+         let then_addr = ops_count
+         ops_push(OP_ELSE, 0)
+         compile_expr(nodes[node].nodes[NODE_IF_THEN], false)
+
+         let else_addr = ops_count
+         ops_push(OP_GOTO, 0)
+         ops[then_addr].data = ops_count
+         compile_expr(nodes[node].nodes[NODE_IF_ELSE], false)
+         ops[else_addr].data = ops_count
+      }
+
+      else => assert false
    }
 }
 
