@@ -7,6 +7,12 @@ struct Arena {
    size int
 }
 
+fn arena_new() Arena {
+   let arena Arena
+   arena.size = 0
+   return arena
+}
+
 fn arena_push(arena *Arena, data *char, size int) {
    assert arena.size + size <= ARENA_CAP
    memcpy(&arena.data + arena.size as *char, data, size)
@@ -26,4 +32,11 @@ fn [<<](a *Arena, ch char) *Arena {
 fn [<<](a *Arena, n int) *Arena {
    let buf [20]char
    return a << str_from_int(&buf, n)
+}
+
+fn str_from_arena(arena Arena) Str {
+   let str Str
+   str.data = &arena.data as *char
+   str.size = arena.size
+   return str
 }
