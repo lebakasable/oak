@@ -33,10 +33,3 @@ fn [<<](a *Arena, n int) *Arena {
    let buf [20]char
    return a << str_from_int(&buf, n)
 }
-
-fn str_from_arena(arena Arena) Str {
-   let str Str
-   str.data = &arena.data as *char
-   str.size = arena.size
-   return str
-}

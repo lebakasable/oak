@@ -1,11 +1,15 @@
 use std.math
 use std.libc
 
-fn str_from_cstr(src *char) Str {
+fn str_new(data *char, size int) Str {
    let str Str
-   str.data = src
-   str.size = strlen(src)
+   str.data = data
+   str.size = size
    return str
+}
+
+fn str_from_cstr(src *char) Str {
+   return str_new(src, strlen(src))
 }
 
 fn str_from_int(buf *char, n int) Str {
