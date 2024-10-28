@@ -23,14 +23,14 @@ struct Hash_Map {
 assert COUNT_HASH_MAPS == 2
 fn hash_map_hash(map *Hash_Map, key *char) int {
    match map.kind {
-      HASH_MAP_INT => {
+      HASH_MAP_INT => return *(key as *int)%HASH_MAP_CAP
+      HASH_MAP_STR => {
          let hash = 5381
-         for let i = 0, i < (key as *Str).size, i += 1 {
-            hash = ((hash << 5) + hash) + (key as *Str).data[i] as int
+         for let i = 0, i < (*(key as *Str)).size, i += 1 {
+            hash = ((hash << 5) + hash) + (*(key as *Str)).data[i] as int
          }
          return hash%HASH_MAP_CAP
       }
-      HASH_MAP_STR => return *(key as *int)%HASH_MAP_CAP
       else => assert false
    }
    return 0
@@ -104,4 +104,16 @@ fn hash_map_delete(map *Hash_Map, key *char) bool {
       node = node.next
    }
    return false
+}
+
+fn hash_map_free(map *Hash_Map) {
+   for let i = 0, i < HASH_MAP_CAP, i += 1 {
+      let node = map.buckets[i]
+      for node != 0 as *Hash_Map_Node {
+         let temp = node
+         node = node.next
+         free(temp as *char)
+      }
+   }
+   free(map as *char)
 }
