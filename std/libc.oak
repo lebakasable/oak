@@ -110,6 +110,38 @@ fn time(tloc *int) int {
    return syscall(201, tloc)
 }
 
+fn socket(domain int, type int, protocol int) int {
+   return syscall(41, domain, type, protocol)
+}
+
+const SOCK_STREAM = 1
+const AF_INET = 2
+const INADDR_LOCAL = 16777343
+
+fn htons(x int) int {
+   return ((x&255) << 8)|((x >> 8)&255)
+}
+
+fn bind(sockfd int, addr *[16]char, addrlen int) int {
+   return syscall(49, sockfd, addr, addrlen)
+}
+
+fn listen(sockfd int, backlog int) int {
+   return syscall(50, sockfd, backlog)
+}
+
+fn accept(sockfd int, addr *[16]char, addrlen *int) int {
+   return syscall(43, sockfd, addr, addrlen)
+}
+
+const SOL_SOCKET = 1
+const SO_REUSEADDR = 2
+const SO_REUSEPORT = 15
+
+fn setsockopt(fd int, level int, optname int, optval *char, optlen int) int {
+   return syscall(54, fd, level, optname, optval, optlen)
+}
+
 fn isspace(ch char) bool {
    return ch == ' ' || ch == '\t' || ch == '\n'
 }

@@ -1,0 +1,107 @@
+use std.io
+use std.arena
+
+const PORT = 6969
+
+const HEADER_DATA_CAP = 1024
+let header_data [HEADER_DATA_CAP]char
+
+let res Arena
+
+fn main() {
+   let servfd = socket(AF_INET, SOCK_STREAM, 0)
+   if servfd < 0 {
+      &stderr << "error: could not create socket\n"
+      exit(1)
+   }
+
+   &stdout << "info: created socket " << servfd << "\n"
+
+   let servopt = 1
+   setsockopt(servfd, SOL_SOCKET, SO_REUSEADDR, &servopt as *char, sizeof(int))
+   setsockopt(servfd, SOL_SOCKET, SO_REUSEPORT, &servopt as *char, sizeof(int))
+
+   let servaddr [16]char
+   *(&servaddr as *int + 0 as *int) = AF_INET
+   *(&servaddr as *int + 2 as *int) = htons(PORT)
+   *(&servaddr as *int + 4 as *int) = INADDR_LOCAL
+
+   if bind(servfd, &servaddr, 16) < 0 {
+      &stderr << "error: could not bind socket\n"
+      exit(1)
+   }
+
+   &stdout << "info: socket bound to port " << PORT << "\n"
+
+   if listen(servfd, 5) < 0 {
+      &stderr << "error: could not start listening\n"
+      exit(1)
+   }
+
+   &stdout << "info: started listening\n"
+
+   let cliaddr [16]char
+   let clilen int
+
+   let req_count = 0
+
+   let quit = false
+   for !quit {
+      let connfd = accept(servfd, &cliaddr, &clilen)
+      if connfd < 0 {
+         &stderr << "error: could not accept client\n"
+         exit(1)
+      }
+
+      &stdout << "info: client accepted\n"
+
+      let header_size = read(connfd, &header_data, HEADER_DATA_CAP)
+      if header_size < 0 {
+         &stderr << "error: could not read request\n"
+         exit(1)
+      }
+
+      let header = str_new(&header_data as *char, header_size)
+      let req = str_split_by(&header, '\n')
+      str_split_by(&req, ' ')
+      let route = str_split_by(&req, ' ')
+      
+      if route == "/" {
+         req_count += 1
+
+         res.size = 0
+         &res << "HTTP/1.1 200 OK\r\n"
+         &res << "Server: Oak\r\n"
+         &res << "Content-Type: text/html\r\n"
+         &res << "Connection: Closed\r\n"
+         &res << "\r\n"
+         &res << "<h1>Hello, World!</h1>\n"
+         &res << "<p>This page has been requested " << req_count << " times</p>\n"
+         write(connfd, &res.data as *char, res.size)
+      } else if route == "/quit" {
+         res.size = 0
+         &res << "HTTP/1.1 200 OK\r\n"
+         &res << "Server: Oak\r\n"
+         &res << "Content-Type: text/html\r\n"
+         &res << "Connection: Closed\r\n"
+         &res << "\r\n"
+         &res << "<h1>Shutting down the server...</h1>\n"
+         write(connfd, &res.data as *char, res.size)
+
+         quit = true
+      } else {
+         res.size = 0
+         &res << "HTTP/1.1 404 Not Found\r\n"
+         &res << "Server: Oak\r\n"
+         &res << "Content-Type: text/html\r\n"
+         &res << "Connection: Closed\r\n"
+         &res << "\r\n"
+         &res << "<h1>404</h1>\n"
+         write(connfd, &res.data as *char, res.size)
+      }
+
+      close(connfd)
+   }
+
+   close(servfd)
+}
