@@ -54,6 +54,9 @@ fn swap() {
 }
 
 fn main() {
+   let delta_time [16]char
+   *(&delta_time as *int + 8 as *int) = 100000000
+
    front[0][1] = true
    front[1][2] = true
    front[2][0] = true
@@ -70,6 +73,6 @@ fn main() {
 
       swap()
 
-      for let i = 0, i < 20000000, i += 1 {}
+      clock_nanosleep(CLOCK_MONOTONIC, 0, &delta_time, 0 as *char)
    }
 }

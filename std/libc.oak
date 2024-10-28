@@ -156,6 +156,12 @@ fn isatty(fd int) bool {
    return ioctl(fd, TIOCGWINSZ, &wsz as int) == 0
 }
 
+const CLOCK_MONOTONIC = 1
+
+fn clock_nanosleep(which_clock int, flags int, rqtp *[16]char, rmtp *[16]char) int {
+   return syscall(230, which_clock, flags, rqtp, rmtp)
+}
+
 fn isspace(ch char) bool {
    return ch == ' ' || ch == '\t' || ch == '\n'
 }

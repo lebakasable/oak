@@ -136,6 +136,9 @@ fn main() {
    *(&tattr as *int + 12 as *int) = *(&tattr as *int + 12 as *int) & ~(ICANON | ECHO)
    tcsetattr(STDIN, TCSAFLUSH, &tattr)
 
+   let delta_time [16]char
+   *(&delta_time as *int + 8 as *int) = 200000000
+
    fcntl(STDIN, F_SETFL, fcntl(STDIN, F_GETFL, 0) | O_NONBLOCK)
 
    spawn_snake(point_new(5, 5), DIR_RIGHT, 3)
@@ -187,7 +190,7 @@ fn main() {
          }
       }
 
-      for let i = 0, i < 20000000, i += 1 {}
+      clock_nanosleep(CLOCK_MONOTONIC, 0, &delta_time, 0 as *char)
    }
 
    tcsetattr(STDIN, TCSANOW, &saved_tattr)
