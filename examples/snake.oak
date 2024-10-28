@@ -51,12 +51,11 @@ fn point_step(point *Point, dir Dir) {
 
 const SNAKE_CAP = ROWS*COLS
 let snake [SNAKE_CAP]Point
-let snake_begin int
-let snake_size int
+let snake_begin = 0
+let snake_size = 0
 
 fn snake_add(point Point) {
    if snake_size >= SNAKE_CAP {
-      &stdout << "\e[?25h"
       &stdout << "You won!\n"
       exit(0)
    }
@@ -80,27 +79,30 @@ fn snake_del() {
 
 let head_pos Point
 let head_dir Dir
+let score = 0
 
 fn display() {
+   &stdout << "Score: " << score << "\n"
    for let y = 0, y < ROWS, y += 1 {
       for let x = 0, x < COLS, x += 1 {
          match cells[y][x] {
-            CELL_EMPTY => &stdout << "."
-            CELL_APPLE => &stdout << "*"
-            CELL_SNAKE => &stdout << "#"
+            CELL_EMPTY => &stdout << '.'
+            CELL_APPLE => &stdout << '*'
+            CELL_SNAKE => &stdout << '#'
             else => assert false
          }
       }
-      &stdout << "\n"
+      &stdout << '\n'
    }
+   &stdout << "WASD to move, Q to quit, SPACE to toggle pause\n"
 }
 
 fn spawn_apple() {
-   let x = (rand()<<32)%COLS
-   let y = (rand()<<32)%ROWS
+   let x = rand()%COLS
+   let y = rand()%ROWS
    for cells[y][x] != CELL_EMPTY {
-      x = (rand()<<32)%COLS
-      y = (rand()<<32)%ROWS
+      x = rand()%COLS
+      y = rand()%ROWS
    }
    cells[y][x] = CELL_APPLE
 }
@@ -120,33 +122,30 @@ fn main() {
    srand(time(0 as *int))
 
    fcntl(STDIN, F_SETFL, fcntl(STDIN, F_GETFL, 0) | O_NONBLOCK)
-   &stdout << "\e[?25l"
 
    spawn_snake(point_new(5, 5), DIR_RIGHT, 3)
    spawn_apple()
 
    let input char
    let pause = false
-   let score = 0
 
    display()
    for true {
-      &stdout << "\e[" << ROWS << "A"
+      &stdout << "\e[" << ROWS + 2 << "A"
       &stdout << "\e[" << COLS << "D"
       display()
 
       let ret = read(STDIN, &input, 1)
       if ret == 1 {
          match input {
-            'z' => if head_dir != DIR_DOWN { head_dir = DIR_UP }
-            'q' => if head_dir != DIR_RIGHT { head_dir = DIR_LEFT }
+            'w' => if head_dir != DIR_DOWN { head_dir = DIR_UP }
+            'a' => if head_dir != DIR_RIGHT { head_dir = DIR_LEFT }
             's' => if head_dir != DIR_UP { head_dir = DIR_DOWN }
             'd' => if head_dir != DIR_LEFT { head_dir = DIR_RIGHT }
-            'e' => break
+            'q' => exit(0)
             ' ' => pause = !pause
          }
       } else if ret != EAGAIN {
-         &stdout << "\e[?25h"
          &stderr << "error: read command failed\n"
          exit(1)
       }
@@ -156,8 +155,8 @@ fn main() {
 
          match cells[head_pos.y][head_pos.x] {
             CELL_SNAKE => {
-               &stdout << "You died with score: " << score << "\n"
-               break
+               &stdout << "You died with score " << score << "\n"
+               exit(0)
             }
             CELL_APPLE => {
                snake_add(head_pos)
@@ -174,6 +173,4 @@ fn main() {
 
       for let i = 0, i < 20000000, i += 1 {}
    }
-
-   &stdout << "\e[?25h"
 }
