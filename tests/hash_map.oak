@@ -1,0 +1,24 @@
+##
+stdout: 3
+69
+##
+
+use std.io
+use std.hash_map
+
+fn main() {
+   let map = hash_map_new(HASH_MAP_STR)
+
+   let key1 = "hello"
+   let value1 = 69
+   assert hash_map_put(&map, &key1 as *char, &value1 as *char)
+
+   let retreived = hash_map_get(&map, &key1 as *char) as *int
+   assert retreived != 0 as *int
+   &stdout << *retreived << "\n"
+
+   assert hash_map_delete(&map, &key1 as *char)
+
+   let retreived = hash_map_get(&map, &key1 as *char) as *int
+   assert retreived == 0 as *int
+}

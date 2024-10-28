@@ -1,0 +1,107 @@
+use std.str
+
+const HASH_MAP_CAP = 1024
+
+struct Hash_Map_Node {
+   key *char
+   value *char
+   next *Hash_Map_Node
+}
+
+alias Hash_Map_Kind int
+const (
+   HASH_MAP_INT
+   HASH_MAP_STR
+   COUNT_HASH_MAPS
+)
+
+struct Hash_Map {
+   buckets [HASH_MAP_CAP]*Hash_Map_Node
+   kind Hash_Map_Kind
+}
+
+assert COUNT_HASH_MAPS == 2
+fn hash_map_hash(map *Hash_Map, key *char) int {
+   match map.kind {
+      HASH_MAP_INT => {
+         let hash = 5381
+         for let i = 0, i < (key as *Str).size, i += 1 {
+            hash = ((hash << 5) + hash) + (key as *Str).data[i] as int
+         }
+         return hash%HASH_MAP_CAP
+      }
+      HASH_MAP_STR => return *(key as *int)%HASH_MAP_CAP
+      else => assert false
+   }
+   return 0
+}
+
+assert COUNT_HASH_MAPS == 2
+fn hash_map_eql(map *Hash_Map, key1 *char, key2 *char) bool {
+   match map.kind {
+      HASH_MAP_INT => return *(key1 as *int) == *(key2 as *int)
+      HASH_MAP_STR => return *(key1 as *Str) == *(key2 as *Str)
+      else => assert false
+   }
+   return false
+}
+
+fn hash_map_new(kind Hash_Map_Kind) Hash_Map {
+   let hash_map Hash_Map
+   hash_map.kind = kind
+   return hash_map
+}
+
+fn hash_map_put(map *Hash_Map, key *char, value *char) bool {
+   let hash = hash_map_hash(map, key)
+   let node = map.buckets[hash]
+
+   for node != 0 as *Hash_Map_Node {
+      if hash_map_eql(map, node.key, key) {
+         node.value = value
+         return false
+      }
+      node = node.next
+   }
+
+   node = malloc(sizeof(Hash_Map_Node)) as *Hash_Map_Node
+   node.key = key
+   node.value = value
+   node.next = map.buckets[hash]
+   map.buckets[hash] = node
+   return true
+}
+
+fn hash_map_get(map *Hash_Map, key *char) *char {
+   let hash = hash_map_hash(map, key)
+   let node = map.buckets[hash]
+
+   for node != 0 as *Hash_Map_Node {
+      if hash_map_eql(map, node.key, key) {
+         return node.value
+      }
+      node = node.next
+   }
+   return 0 as *char
+}
+
+fn hash_map_delete(map *Hash_Map, key *char) bool {
+   let hash = hash_map_hash(map, key)
+   let node = map.buckets[hash]
+   let prev = 0 as *Hash_Map_Node
+
+   for node != 0 as *Hash_Map_Node {
+      if hash_map_eql(map, node.key, key) {
+         if prev != 0 as *Hash_Map_Node {
+            prev.next = node.next
+         } else {
+            map.buckets[hash] = node.next
+         }
+         free(node as *char)
+         return true
+      }
+      prev = node
+      node = node.next
+   }
+   return false
+}
