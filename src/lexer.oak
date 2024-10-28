@@ -255,6 +255,7 @@ fn lexer_char(name Str) char {
       let pos = lexer.pos
       match lexer_consume() {
          'n' => ch = '\n'
+         'r' => ch = '\r'
          't' => ch = '\t'
          '0' => ch = '\0'
          '"' => ch = '"'

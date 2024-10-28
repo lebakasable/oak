@@ -163,6 +163,7 @@ fn str_encode(str Str, cstr bool) Str {
          i += 1
          match str.data[i] {
             'n' => ch = '\n'
+            'r' => ch = '\r'
             't' => ch = '\t'
             '0' => ch = '\0'
             '"' => ch = '"'
