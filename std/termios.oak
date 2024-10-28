@@ -1,0 +1,12 @@
+use std.libc
+
+fn tcgetattr(fd int, tio *[60]char) int {
+   return ioctl(fd, TCGETS, tio as int)
+}
+
+fn tcsetattr(fd int, act int, tio *[60]char) int {
+   if act < 0 || act > 2 {
+      return -EINVAL
+   }
+   return ioctl(fd, TCSETS + act, tio as int)
+}

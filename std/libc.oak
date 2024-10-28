@@ -1,4 +1,5 @@
-const EAGAIN = -11
+const EAGAIN = 11
+const EINVAL = 22
 
 const STDIN = 0
 const STDOUT = 1
@@ -140,6 +141,19 @@ const SO_REUSEPORT = 15
 
 fn setsockopt(fd int, level int, optname int, optval *char, optlen int) int {
    return syscall(54, fd, level, optname, optval, optlen)
+}
+
+const TIOCGWINSZ = 21523
+const TCGETS = 21505
+const TCSETS = 21506
+const ICANON = 2
+const ECHO = 8
+const TCSAFLUSH = 2
+const TCSANOW = 0
+
+fn isatty(fd int) bool {
+   let wsz [8]char
+   return ioctl(fd, TIOCGWINSZ, &wsz as int) == 0
 }
 
 fn isspace(ch char) bool {

@@ -1,8 +1,7 @@
-#!/usr/bin/env -S sh -c 'stty -icanon -echo; oak run examples/snake.oak; stty sane'
-
 use std.io
 use std.libc
 use std.math
+use std.termios
 
 const ROWS = 10
 const COLS = 20
@@ -49,15 +48,22 @@ fn point_step(point *Point, dir Dir) {
    point.y = emod(point.y, ROWS)
 }
 
+let score = 0
+let quit = -1
+let pause = false
+
 const SNAKE_CAP = ROWS*COLS
 let snake [SNAKE_CAP]Point
 let snake_begin = 0
 let snake_size = 0
 
+let head_pos Point
+let head_dir Dir
+
 fn snake_add(point Point) {
    if snake_size >= SNAKE_CAP {
       &stdout << "You won!\n"
-      exit(0)
+      quit = 0
    }
 
    cells[point.y][point.x] = CELL_SNAKE
@@ -75,26 +81,6 @@ fn snake_del() {
 
    snake_size -= 1
    snake_begin = (snake_begin + 1)%SNAKE_CAP
-}
-
-let head_pos Point
-let head_dir Dir
-let score = 0
-
-fn display() {
-   &stdout << "Score: " << score << "\n"
-   for let y = 0, y < ROWS, y += 1 {
-      for let x = 0, x < COLS, x += 1 {
-         match cells[y][x] {
-            CELL_EMPTY => &stdout << '.'
-            CELL_APPLE => &stdout << '*'
-            CELL_SNAKE => &stdout << '#'
-            else => assert false
-         }
-      }
-      &stdout << '\n'
-   }
-   &stdout << "WASD to move, Q to quit, SPACE to toggle pause\n"
 }
 
 fn spawn_apple() {
@@ -118,8 +104,37 @@ fn spawn_snake(point Point, dir Dir, len int) {
    }
 }
 
+fn display() {
+   &stdout << "Score: " << score << "\n"
+   for let y = 0, y < ROWS, y += 1 {
+      for let x = 0, x < COLS, x += 1 {
+         match cells[y][x] {
+            CELL_EMPTY => &stdout << '.'
+            CELL_APPLE => &stdout << '*'
+            CELL_SNAKE => &stdout << '#'
+            else => assert false
+         }
+      }
+      &stdout << '\n'
+   }
+   &stdout << "WASD to move, Q to quit, SPACE to toggle pause\n"
+}
+
 fn main() {
    srand(time(0 as *int))
+
+   let saved_tattr [60]char
+   let tattr [60]char
+
+   if !isatty(STDIN) {
+      &stderr << "error: this game can only be played in a terminal\n"
+      exit(1)
+   }
+
+   tcgetattr(STDIN, &saved_tattr)
+   tcgetattr(STDIN, &tattr)
+   *(&tattr as *int + 12 as *int) = *(&tattr as *int + 12 as *int) & ~(ICANON | ECHO)
+   tcsetattr(STDIN, TCSAFLUSH, &tattr)
 
    fcntl(STDIN, F_SETFL, fcntl(STDIN, F_GETFL, 0) | O_NONBLOCK)
 
@@ -127,10 +142,9 @@ fn main() {
    spawn_apple()
 
    let input char
-   let pause = false
 
    display()
-   for true {
+   for quit == -1 {
       &stdout << "\e[" << ROWS + 2 << "A"
       &stdout << "\e[" << COLS << "D"
       display()
@@ -142,13 +156,15 @@ fn main() {
             'a' => if head_dir != DIR_RIGHT { head_dir = DIR_LEFT }
             's' => if head_dir != DIR_UP { head_dir = DIR_DOWN }
             'd' => if head_dir != DIR_LEFT { head_dir = DIR_RIGHT }
-            'q' => exit(0)
+            'q' => quit = 0
             ' ' => pause = !pause
          }
-      } else if ret != EAGAIN {
+      } else if ret != -EAGAIN {
          &stderr << "error: read command failed\n"
-         exit(1)
+         quit = 1
       }
+
+      if quit != -1 { break }
 
       if !pause {
          point_step(&head_pos, head_dir)
@@ -156,7 +172,7 @@ fn main() {
          match cells[head_pos.y][head_pos.x] {
             CELL_SNAKE => {
                &stdout << "You died with score " << score << "\n"
-               exit(0)
+               quit = 0
             }
             CELL_APPLE => {
                snake_add(head_pos)
@@ -173,4 +189,7 @@ fn main() {
 
       for let i = 0, i < 20000000, i += 1 {}
    }
+
+   tcsetattr(STDIN, TCSANOW, &saved_tattr)
+   exit(quit)
 }
