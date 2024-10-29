@@ -1,0 +1,27 @@
+const N = 10001
+
+fn is_prime(n int) bool {
+   if n <= 1 { return false }
+   if n <= 3 { return true }
+   if n%2 == 0 || n%3 == 0 { return false }
+   for let i = 5, i*i <= n, i += 6 {
+      if n%i == 0 || n%(i + 2) == 0 {
+         return false
+      }
+   }
+   return true
+}
+
+fn main() {
+   let count = 0
+   let n = 1
+   let res int
+   for count < N {
+      n += 1
+      if is_prime(n) {
+         count += 1
+         res = n
+      }
+   }
+   print res
+}
