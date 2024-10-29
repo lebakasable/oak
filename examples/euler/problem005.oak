@@ -1,8 +1,10 @@
+const N = 20
+
 fn main() {
-   let acc [20]int
-   let tmp [20]int
-   for let i = 2, i <= 20, i += 1 {
-      for let i = 0, i < 20, i += 1 {
+   let acc [N]int
+   let tmp [N]int
+   for let i = 2, i <= N, i += 1 {
+      for let i = 0, i < N, i += 1 {
          tmp[i] = 0
       }
 
@@ -17,7 +19,7 @@ fn main() {
          }
       }
 
-      for let i = 0, i < 20, i += 1 {
+      for let i = 0, i < N, i += 1 {
          if acc[i] < tmp[i] {
             acc[i] = tmp[i]
          }
@@ -25,7 +27,7 @@ fn main() {
    }
 
    let res = 1
-   for let i = 0, i < 20, i += 1 {
+   for let i = 0, i < N, i += 1 {
       for let j = acc[i], j > 0, j -= 1 {
          res *= i
       }

@@ -1,8 +1,10 @@
+const N = 4000000
+
 fn main() {
    let res = 0
    let a = 1
    let b = 2
-   for a < 4000000 {
+   for a < N {
       if a%2 == 0 {
          res += a
       }

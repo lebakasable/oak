@@ -1,5 +1,7 @@
+const N = 600851475143
+
 fn main() {
-   let n = 600851475143
+   let n = N
    let res = 2
    for n > 1 {
       if n%res == 0 {

@@ -1,7 +1,9 @@
+const N = 1000
+
 fn main() {
    let res = 0
-   for let i = 100, i < 1000, i += 1 {
-      for let j = 100, j < 1000, j += 1 {
+   for let i = N/10, i < N, i += 1 {
+      for let j = N/10, j < N, j += 1 {
          let a = i*j
          let b = 0
          for a > 0 {
