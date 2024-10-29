@@ -3,3 +3,6 @@
 !/tests/*.oak
 /examples/*
 !/examples/*.oak
+!/examples/euler/
+/examples/euler/*
+!/examples/euler/*.oak
