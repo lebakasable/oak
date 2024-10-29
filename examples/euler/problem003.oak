@@ -1,0 +1,12 @@
+fn main() {
+   let n = 600851475143
+   let res = 2
+   for n > 1 {
+      if n%res == 0 {
+         n /= res
+      } else {
+         res += 1
+      }
+   }
+   print res
+}
