@@ -1,0 +1,34 @@
+fn main() {
+   let acc [20]int
+   let tmp [20]int
+   for let i = 2, i <= 20, i += 1 {
+      for let i = 0, i < 20, i += 1 {
+         tmp[i] = 0
+      }
+
+      let n = i
+      let fac = 2
+      for n > 1 {
+         if n%fac == 0 {
+            tmp[fac] += 1
+            n /= fac
+         } else {
+            fac += 1
+         }
+      }
+
+      for let i = 0, i < 20, i += 1 {
+         if acc[i] < tmp[i] {
+            acc[i] = tmp[i]
+         }
+      }
+   }
+
+   let res = 1
+   for let i = 0, i < 20, i += 1 {
+      for let j = acc[i], j > 0, j -= 1 {
+         res *= i
+      }
+   }
+   print res
+}
