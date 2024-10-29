@@ -1,0 +1,14 @@
+fn main() {
+   let res = 0
+   let a = 1
+   let b = 2
+   for a < 4000000 {
+      if a%2 == 0 {
+         res += a
+      }
+      let next = a + b
+      a = b
+      b = next
+   }
+   print res
+}
