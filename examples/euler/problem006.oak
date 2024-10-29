@@ -1,0 +1,13 @@
+const N = 100
+
+fn main() {
+   let sum_of_squares = 0
+   for let i = 1, i <= N, i += 1 {
+      sum_of_squares += i*i
+   }
+
+   let sum = (N*(N + 1))/2
+   let square_of_sum = sum*sum
+
+   print square_of_sum - sum_of_squares
+}
